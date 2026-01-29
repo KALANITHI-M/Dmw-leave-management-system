@@ -1,0 +1,208 @@
+/* Signup Page Styles */
+
+.signup-content {
+  --background: #f5f5f5;
+}
+
+.signup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px 10px;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 550px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  margin: 20px 0;
+  background: #ffffff;
+}
+
+.signup-card ion-card-content {
+  padding: 30px 20px;
+}
+
+/* Input Items */
+.input-item {
+  --background: #f8f9fa;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.input-item:hover {
+  border-color: #ff6600;
+  box-shadow: 0 2px 8px rgba(255, 102, 0, 0.1);
+}
+
+.input-item:focus-within {
+  border-color: #ff6600;
+  box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+/* Icon Styling */
+.input-icon {
+  color: #ff6600;
+  font-size: 22px;
+  margin-right: 12px;
+  min-width: 22px;
+}
+
+/* Label Styling */
+.input-label {
+  color: #333333;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Input Field Styling */
+.custom-input {
+  --padding-start: 0;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-size: 15px;
+  color: #333333;
+}
+
+.custom-input::placeholder {
+  color: #999999;
+  font-size: 14px;
+}
+
+/* Remove Ionic's default input padding */
+.input-item .sc-ion-input-md-h,
+.input-item .sc-ion-input-ios-h {
+  --padding-start: 0 !important;
+}
+
+/* Sign Up Button */
+.signup-button {
+  margin-top: 30px;
+  margin-bottom: 0;
+  --background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
+  --background-hover: #e05a00;
+  --background-activated: #cc5200;
+  --box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+  font-weight: 700;
+  font-size: 16px;
+  height: 52px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.signup-button:hover {
+  --box-shadow: 0 6px 16px rgba(255, 102, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Login Link */
+.login-link {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.login-link ion-text {
+  font-size: 14px;
+}
+
+.link {
+  color: #ff6600;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #e05a00;
+  text-decoration: underline;
+}
+
+/* Date Input Specific Styling */
+input[type="date"] {
+  font-family: inherit;
+  padding: 8px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .signup-card {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .signup-card ion-card-content {
+    padding: 25px 15px;
+  }
+
+  .input-item {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+
+  .input-icon {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-container {
+    padding: 10px;
+  }
+
+  .signup-card {
+    margin: 10px 0;
+  }
+
+  .signup-card ion-card-content {
+    padding: 20px 12px;
+  }
+
+  .input-item {
+    margin-bottom: 16px;
+  }
+
+  .signup-button {
+    height: 48px;
+    font-size: 15px;
+  }
+}
+
+/* Fix for iOS specific issues */
+@supports (-webkit-touch-callout: none) {
+  .input-item {
+    --min-height: auto;
+  }
+}
+
+/* Loading Spinner Customization */
+ion-loading {
+  --background: rgba(0, 0, 0, 0.8);
+  --spinner-color: #ff6600;
+}
+
+/* Toast Customization */
+ion-toast {
+  --border-radius: 12px;
+}
+.toggle-password-icon {
+  cursor: pointer;
+  color: var(--ion-color-medium);
+}

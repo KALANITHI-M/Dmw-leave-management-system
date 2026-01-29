@@ -1,0 +1,202 @@
+.applied-leaves-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.applied-leaves-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.applied-leaves-header {
+  background: #f8f9fa;
+  border-bottom: 2px solid #3880ff;
+  padding-bottom: 8px;
+}
+
+.applied-leaves-header ion-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  letter-spacing: 0.5px;
+}
+
+.leave-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 8px 0 0;
+}
+
+.no-leaves {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.no-leaves p {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.no-leaves-sub {
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+.leaves-list {
+  background: transparent;
+  padding: 0;
+}
+
+.leave-item-card {
+  margin: 16px 0;
+  border-left: 4px solid #3880ff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+.leave-item-card[data-status="Approved"] {
+  border-left-color: #2dd36f;
+}
+
+.leave-item-card[data-status="Rejected"] {
+  border-left-color: #eb445a;
+}
+
+.leave-item-card[data-status="Pending"] {
+  border-left-color: #ffc409;
+}
+
+.leave-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.leave-type-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.leave-type {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  text-transform: uppercase;
+}
+
+.leave-item-body {
+  padding: 16px;
+}
+
+.leave-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #212529;
+  font-size: 0.9rem;
+}
+
+.days-chip {
+  height: 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.leave-reason,
+.hr-comments {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.leave-reason strong,
+.hr-comments strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.leave-reason p,
+.hr-comments p {
+  color: #212529;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.hr-comments {
+  background: #fff3cd;
+  border-left: 3px solid #ffc409;
+}
+
+.approval-info,
+.rejection-info {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.approval-info {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.rejection-info {
+  background: #f8d7da;
+  color: #842029;
+}
+
+.approval-text,
+.rejection-text {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .applied-leaves-container {
+    padding: 12px;
+  }
+
+  .leave-item-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .leave-type-section {
+    width: 100%;
+  }
+
+  .info-label,
+  .info-value {
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,74 @@
+.employee-dashboard-content {
+  --background: #f5f5f5;
+}
+
+.dashboard-content {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card ion-card-content {
+  text-align: center;
+  padding: 24px;
+}
+
+.stat-card h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.stat-card p {
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-card {
+  background: linear-gradient(135deg, #3880ff 0%, #5a9fff 100%);
+  color: white;
+}
+
+.pending-card {
+  background: linear-gradient(135deg, #ffc409 0%, #ffd752 100%);
+  color: #000;
+}
+
+.approved-card {
+  background: linear-gradient(135deg, #2dd36f 0%, #4ee58b 100%);
+  color: white;
+}
+
+.rejected-card {
+  background: linear-gradient(135deg, #eb445a 0%, #f06e7f 100%);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  .stat-card h2 {
+    font-size: 2rem;
+  }
+
+  .stat-card ion-card-content {
+    padding: 20px;
+  }
+}
