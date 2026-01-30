@@ -22,6 +22,7 @@ import {
   addCircleOutline,
   listOutline,
   peopleOutline,
+  gitPullRequestOutline,
 } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -200,6 +201,17 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                 >
                   <IonIcon icon={documentTextOutline} slot="start" />
                   <IonLabel>Leave Requests</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'requests' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('requests')}
+                >
+                  <IonIcon icon={gitPullRequestOutline} slot="start" />
+                  <IonLabel>Profile Requests</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             </>

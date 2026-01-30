@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
+import profileChangeRequestRoutes from './routes/profileChangeRequestRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/leaves', leaveRoutes);
+app.use('/api/profile-change-requests', profileChangeRequestRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'DMW CNC Solutions - Leave Management System API' });

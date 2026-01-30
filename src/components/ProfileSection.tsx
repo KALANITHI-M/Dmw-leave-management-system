@@ -19,6 +19,7 @@ import {
 import Cropper from 'react-easy-crop';
 import { useAuth } from '../context/AuthContext';
 import { employeeService } from '../api/employeeService';
+import { profileChangeRequestService } from '../api/profileChangeRequestService';
 import './ProfileSection.css';
 
 const ProfileSection: React.FC = () => {
@@ -186,18 +187,38 @@ const ProfileSection: React.FC = () => {
 
     setLoading(true);
     try {
-      const updatedEmployee = await employeeService.updateEmployee(user._id, editedData);
-      // Merge the updated employee data with the existing user token
-      const updatedUser = {
-        ...updatedEmployee,
-        token: user.token, // Preserve the authentication token
-      };
-      updateUser(updatedUser);
-      setIsEditing(false);
-      setToastMessage('Profile updated successfully');
-      setShowToast(true);
+      if (user.role === 'hr') {
+        // HR can directly update their profile
+        const updatedEmployee = await employeeService.updateEmployee(user._id, editedData);
+        // Merge the updated employee data with the existing user token
+        const updatedUser = {
+          ...updatedEmployee,
+          token: user.token, // Preserve the authentication token
+        };
+        updateUser(updatedUser);
+        setIsEditing(false);
+        setToastMessage('Profile updated successfully');
+        setShowToast(true);
+      } else {
+        // Employee creates a change request
+        await profileChangeRequestService.createRequest({
+          employeeId: user._id,
+          requestedBy: user._id,
+          requestedChanges: editedData,
+          currentData: {
+            name: user.name,
+            email: user.email,
+            department: user.department,
+            designation: user.designation,
+            phoneNumber: user.phoneNumber || '',
+          },
+        });
+        setIsEditing(false);
+        setToastMessage('Profile change request submitted to HR for approval');
+        setShowToast(true);
+      }
     } catch (error: any) {
-      setToastMessage(error.response?.data?.message || 'Failed to update profile');
+      setToastMessage(error.response?.data?.message || 'Failed to process request');
       setShowToast(true);
     } finally {
       setLoading(false);
@@ -334,7 +355,7 @@ const ProfileSection: React.FC = () => {
                     ) : (
                       <>
                         <IonButton color="success" onClick={handleSaveChanges} disabled={loading}>
-                          Save Changes
+                          {user?.role === 'hr' ? 'Save Changes' : 'Request Changes'}
                         </IonButton>
                         <IonButton color="medium" fill="outline" onClick={handleCancelEdit} disabled={loading}>
                           Cancel

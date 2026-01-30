@@ -31,13 +31,14 @@ import { employeeService, Employee } from '../api/employeeService';
 import { leaveService, Leave } from '../api/leaveService';
 import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
+import ProfileChangeRequests from '../components/ProfileChangeRequests';
 import './HRDashboard.css';
 
 const HRDashboard: React.FC = () => {
   const { user } = useAuth();
   const history = useHistory();
   
-  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves'>('overview');
+  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests'>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
@@ -141,6 +142,9 @@ const HRDashboard: React.FC = () => {
     switch (activeSection) {
       case 'profile':
         return <ProfileSection />;
+
+      case 'requests':
+        return <ProfileChangeRequests />;
 
       case 'overview':
         return (
