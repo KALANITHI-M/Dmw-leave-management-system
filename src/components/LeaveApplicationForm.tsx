@@ -257,7 +257,7 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                   <IonInput
                     value={formData.reason}
                     placeholder="Brief reason for leave"
-                    onIonChange={(e) => setFormData({ ...formData, reason: e.detail.value || '' })}
+                    onIonInput={(e) => setFormData({ ...formData, reason: e.detail.value || '' })}
                     className="form-input"
                   />
                 </IonItem>
@@ -276,7 +276,7 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                     placeholder="Detailed description..."
                     rows={4}
                     maxlength={500}
-                    onIonChange={(e) => setFormData({ ...formData, description: e.detail.value || '' })}
+                    onIonInput={(e) => setFormData({ ...formData, description: e.detail.value || '' })}
                     className="form-textarea"
                   />
                   <p className="char-count">You have {500 - (formData.description?.length || 0)} chars left</p>
