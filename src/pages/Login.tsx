@@ -58,7 +58,7 @@ const Login: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding" scrollY={true}>
         <div className="login-container">
           <div className="logo-container">
             <img src="/dmwindia_logo.jpg" alt="DMW Logo" className="company-logo" />

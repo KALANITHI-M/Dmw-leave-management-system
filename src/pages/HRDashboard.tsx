@@ -303,7 +303,7 @@ const HRDashboard: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         
-        <IonContent className="hr-dashboard-content">
+        <IonContent className="hr-dashboard-content" scrollY={true}>
           {renderContent()}
 
           {/* Leave Action Modal */}
@@ -316,7 +316,7 @@ const HRDashboard: React.FC = () => {
                 </IonButtons>
               </IonToolbar>
             </IonHeader>
-            <IonContent className="ion-padding">
+            <IonContent className="ion-padding" scrollY={true}>
               {selectedLeave && (
                 <>
                   <IonCard>

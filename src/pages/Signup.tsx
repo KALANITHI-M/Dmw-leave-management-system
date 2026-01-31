@@ -137,7 +137,7 @@ const Signup: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding" scrollY={true}>
         <div className="login-container">
           <div className="logo-container">
             <img src="/dmwindia_logo.jpg" alt="DMW Logo" className="company-logo" />
@@ -310,7 +310,7 @@ const Signup: React.FC = () => {
 
         {/* Date picker modal */}
         <IonModal isOpen={showDatePicker} onDidDismiss={() => setShowDatePicker(false)}>
-          <IonContent className="ion-padding">
+          <IonContent className="ion-padding" scrollY={true}>
             <IonDatetime
               presentation="date"
               value={formData.joiningDate}

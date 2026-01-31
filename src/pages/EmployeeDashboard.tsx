@@ -163,7 +163,7 @@ const EmployeeDashboard: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         
-        <IonContent className="employee-dashboard-content">
+        <IonContent className="employee-dashboard-content" scrollY={true}>
           {renderContent()}
 
           <IonLoading isOpen={loading} message="Loading..." />
