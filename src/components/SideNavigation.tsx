@@ -24,6 +24,10 @@ import {
   peopleOutline,
   gitPullRequestOutline,
   walletOutline,
+  calendarOutline,
+  barChartOutline,
+  timeOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -162,6 +166,54 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                   <IonLabel>Dashboard</IonLabel>
                 </IonItem>
               </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Attendance</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance')}
+                >
+                  <IonIcon icon={calendarOutline} slot="start" />
+                  <IonLabel>Mark Attendance</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance-report' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance-report')}
+                >
+                  <IonIcon icon={barChartOutline} slot="start" />
+                  <IonLabel>My Attendance</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'my-shift' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('my-shift')}
+                >
+                  <IonIcon icon={timeOutline} slot="start" />
+                  <IonLabel>My Shift</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance-regularization' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance-regularization')}
+                >
+                  <IonIcon icon={alertCircleOutline} slot="start" />
+                  <IonLabel>Attendance Correction</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
             </>
           )}
 
@@ -224,6 +276,28 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                 >
                   <IonIcon icon={walletOutline} slot="start" />
                   <IonLabel>Leave Balances</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance')}
+                >
+                  <IonIcon icon={calendarOutline} slot="start" />
+                  <IonLabel>Attendance</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'shifts' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('shifts')}
+                >
+                  <IonIcon icon={timeOutline} slot="start" />
+                  <IonLabel>Shift Management</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             </>

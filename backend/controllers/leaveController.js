@@ -1,6 +1,7 @@
 import Leave from '../models/Leave.js';
 import Employee from '../models/Employee.js';
 import LeaveBalance from '../models/LeaveBalance.js';
+import Attendance from '../models/Attendance.js';
 import { initLeaveBalance } from './leaveBalanceController.js';
 import multer from 'multer';
 import path from 'path';
@@ -49,6 +50,24 @@ export const uploadProof = async (req, res) => {
 export const applyLeave = async (req, res) => {
   try {
     const { leaveType, startDate, endDate, numberOfDays, reason } = req.body;
+
+    // ── Server-side validation of numberOfDays ─────────────────────────────
+    const sDate = new Date(startDate);
+    const eDate = new Date(endDate);
+    if (isNaN(sDate) || isNaN(eDate)) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+    if (sDate > eDate) {
+      return res.status(400).json({ message: 'Start date cannot be after end date' });
+    }
+    const calendarDays = Math.round((eDate - sDate) / (1000 * 60 * 60 * 24)) + 1;
+    const clientDays = parseFloat(numberOfDays);
+    if (!clientDays || clientDays < 0.5 || clientDays > calendarDays) {
+      return res.status(400).json({
+        message: `Invalid number of days. Must be between 0.5 and ${calendarDays} for the selected date range.`,
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
 
     // ── Balance check ──────────────────────────────────────────────────────
     const year = new Date(startDate).getFullYear();
@@ -186,6 +205,25 @@ export const updateLeaveStatus = async (req, res) => {
         }
       }
       // ─────────────────────────────────────────────────────────────────────
+
+      // ── Create on-leave attendance records for each working day ────────────
+      if (status === 'Approved') {
+        const start = new Date(leave.startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(leave.endDate);
+        end.setHours(0, 0, 0, 0);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const day = d.getDay();
+          if (day === 0 || day === 6) continue; // skip weekends
+          const dateKey = new Date(d);
+          await Attendance.findOneAndUpdate(
+            { employeeId: leave.employeeId, date: dateKey },
+            { $setOnInsert: { employeeId: leave.employeeId, date: dateKey, status: 'on-leave', workingHours: 0 } },
+            { upsert: true }
+          );
+        }
+      }
+      // ──────────────────────────────────────────────────────────────────────
 
       const populatedLeave = await Leave.findById(updatedLeave._id)
         .populate('employeeId', 'name employeeId email department')

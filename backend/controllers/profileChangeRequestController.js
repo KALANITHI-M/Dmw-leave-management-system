@@ -6,6 +6,11 @@ export const createRequest = async (req, res) => {
   try {
     const { employeeId, requestedChanges, currentData } = req.body;
 
+    // Employees can only submit requests for themselves
+    if (employeeId && employeeId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ message: 'You can only submit change requests for your own profile' });
+    }
+
     const request = new ProfileChangeRequest({
       employeeId,
       requestedBy: req.user.id,

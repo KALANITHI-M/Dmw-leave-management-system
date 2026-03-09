@@ -1,0 +1,208 @@
+.attendance-checkin {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Status card ──────────────────────────────────── */
+.att-status-card {
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.att-today-date {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin: 4px 0 0;
+}
+
+.att-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.att-status-badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.att-time-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.att-time-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.att-time-item ion-icon {
+  color: var(--ion-color-medium);
+  font-size: 1rem;
+}
+
+.att-method-tag {
+  background: var(--ion-color-light);
+  color: var(--ion-color-medium);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  margin-left: 2px;
+}
+
+.att-working-hours {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--ion-color-success);
+  margin: 0;
+}
+
+.att-not-checked {
+  color: var(--ion-color-medium);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Location card ────────────────────────────────── */
+.att-location-card {
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: border 0.2s;
+}
+
+.att-location-inrange {
+  border: 1.5px solid var(--ion-color-success);
+}
+
+.att-location-outrange {
+  border: 1.5px solid var(--ion-color-danger);
+}
+
+.att-location-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+}
+
+.att-location-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.att-location-text {
+  flex: 1;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.att-location-error {
+  color: var(--ion-color-warning);
+}
+
+.att-location-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.att-office-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.att-range-ok {
+  font-size: 0.82rem;
+  color: var(--ion-color-success);
+  font-weight: 500;
+}
+
+.att-range-fail {
+  font-size: 0.82rem;
+  color: var(--ion-color-danger);
+  font-weight: 500;
+}
+
+/* ── Action buttons ───────────────────────────────── */
+.att-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.att-btn {
+  --border-radius: 10px;
+  height: 48px;
+  font-weight: 600;
+}
+
+.att-completed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--ion-color-success) 10%, transparent);
+  border-radius: 12px;
+  color: var(--ion-color-success);
+  font-weight: 600;
+}
+
+.att-completed ion-icon {
+  font-size: 1.4rem;
+}
+
+/* ── QR scanner modal ─────────────────────────────── */
+.qr-modal-body {
+  --padding-top: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.qr-scan-hint {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 16px;
+}
+
+.qr-reader-container {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  min-height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--ion-color-medium);
+}
+
+.qr-error-msg {
+  text-align: center;
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  margin-top: 16px;
+  padding: 0 8px;
+}

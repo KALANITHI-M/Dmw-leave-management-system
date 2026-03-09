@@ -9,6 +9,10 @@ import employeeRoutes from './routes/employeeRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import leaveBalanceRoutes from './routes/leaveBalanceRoutes.js';
 import profileChangeRequestRoutes from './routes/profileChangeRequestRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js';
+import shiftRoutes from './routes/shiftRoutes.js';
+import attendanceRegularizationRoutes from './routes/attendanceRegularizationRoutes.js';
+import { startAbsentCronJob } from './utils/markAbsentJob.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -27,6 +31,9 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/leave-balance', leaveBalanceRoutes);
 app.use('/api/profile-change-requests', profileChangeRequestRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/shifts', shiftRoutes);
+app.use('/api/attendance-regularization', attendanceRegularizationRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'DMW CNC Solutions - Leave Management System API' });
@@ -45,4 +52,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  startAbsentCronJob();
 });

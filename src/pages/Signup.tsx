@@ -158,7 +158,7 @@ const Signup: React.FC = () => {
                     inputmode="numeric"
                     maxlength={6}
                     value={formData.employeeId}
-                    onIonChange={(e) => handleChange('employeeId', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('employeeId', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="6-digit Employee ID (e.g., 123456)"
@@ -171,7 +171,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type="text"
                     value={formData.name}
-                    onIonChange={(e) => handleChange('name', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('name', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="Enter your full name"
@@ -184,7 +184,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type="email"
                     value={formData.email}
-                    onIonChange={(e) => handleChange('email', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('email', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="Enter your email"
@@ -198,7 +198,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
-                    onIonChange={(e) => handleChange('password', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('password', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="Minimum 6 characters"
@@ -218,7 +218,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
-                    onIonChange={(e) => handleChange('confirmPassword', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('confirmPassword', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="Re-enter password"
@@ -237,7 +237,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type="text"
                     value={formData.department}
-                    onIonChange={(e) => handleChange('department', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('department', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="e.g., Engineering, HR, Sales"
@@ -250,7 +250,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type="text"
                     value={formData.designation}
-                    onIonChange={(e) => handleChange('designation', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('designation', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="e.g., Software Engineer, Manager"
@@ -265,7 +265,7 @@ const Signup: React.FC = () => {
                     inputmode="numeric"
                     maxlength={10}
                     value={formData.phoneNumber}
-                    onIonChange={(e) => handleChange('phoneNumber', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('phoneNumber', e.detail.value || '')}
                     required
                     className="custom-input"
                     placeholder="10-digit mobile number"
@@ -279,7 +279,7 @@ const Signup: React.FC = () => {
                   <IonInput
                     type="text"
                     value={formData.joiningDate}
-                    onIonChange={(e) => handleChange('joiningDate', e.detail.value || '')}
+                    onIonInput={(e) => handleChange('joiningDate', e.detail.value || '')}
                     placeholder="YYYY-MM-DD"
                     className="custom-input"
                   />

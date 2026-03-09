@@ -324,3 +324,150 @@
     width: 100%;
   }
 }
+
+/* ── HR Attendance Section ──────────────────────────── */
+.hr-attendance-section {
+  padding: 10px;
+}
+
+.att-segment {
+  margin-bottom: 4px;
+}
+
+.att-date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.att-date-input {
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  background: var(--ion-color-light);
+  outline: none;
+}
+
+.att-month-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.att-select {
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  background: var(--ion-color-light);
+  outline: none;
+  min-width: 100px;
+}
+
+.att-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.att-hr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.att-hr-table th {
+  background: var(--ion-color-light);
+  color: var(--ion-color-medium);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.att-hr-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ion-color-light);
+  vertical-align: middle;
+}
+
+.att-hr-table tbody tr:hover {
+  background: color-mix(in srgb, var(--ion-color-primary) 4%, transparent);
+}
+
+.att-emp-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.att-emp-id {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+}
+
+.att-via-chip {
+  display: inline-block;
+  background: var(--ion-color-light);
+  color: var(--ion-color-medium);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  letter-spacing: 0.4px;
+}
+
+.att-loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.att-empty {
+  text-align: center;
+  color: var(--ion-color-medium);
+  font-style: italic;
+  padding: 16px 0;
+  margin: 0;
+}
+
+/* QR display */
+.att-qr-hint {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.att-qr-actions {
+  margin-bottom: 20px;
+}
+
+.att-qr-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+}
+
+.att-qr-date {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+  text-align: center;
+}
+
+.att-qr-expires {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+

@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get('/', protect, hrOnly, getAllEmployees);
 router.get('/stats', protect, hrOnly, getEmployeeStats);
-router.get('/:id', protect, getEmployeeById);
+router.get('/:id', protect, hrOnly, getEmployeeById);
 router.put('/:id', protect, hrOnly, updateEmployee);
 router.delete('/:id', protect, hrOnly, deleteEmployee);
 

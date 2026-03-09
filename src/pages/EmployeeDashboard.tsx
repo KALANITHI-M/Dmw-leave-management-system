@@ -23,13 +23,17 @@ import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
 import LeaveApplicationForm from '../components/LeaveApplicationForm';
 import AppliedLeaves from '../components/AppliedLeaves';
+import AttendanceCheckIn from '../components/AttendanceCheckIn';
+import AttendanceReport from '../components/AttendanceReport';
+import MyShift from '../components/MyShift';
+import AttendanceRegularization from '../components/AttendanceRegularization';
 import './EmployeeDashboard.css';
 
 const EmployeeDashboard: React.FC = () => {
   const { user } = useAuth();
   const history = useHistory();
 
-  const [activeSection, setActiveSection] = useState<'profile' | 'apply-leave' | 'applied-leaves' | 'dashboard'>('apply-leave');
+  const [activeSection, setActiveSection] = useState<'profile' | 'apply-leave' | 'applied-leaves' | 'dashboard' | 'attendance' | 'attendance-report' | 'my-shift' | 'attendance-regularization'>('apply-leave');
   const [myLeaves, setMyLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -189,6 +193,18 @@ const EmployeeDashboard: React.FC = () => {
           </div>
         );
       
+      case 'attendance':
+        return <AttendanceCheckIn />;
+
+      case 'attendance-report':
+        return <AttendanceReport />;
+
+      case 'my-shift':
+        return <MyShift />;
+
+      case 'attendance-regularization':
+        return <AttendanceRegularization />;
+
       default:
         return <LeaveApplicationForm onSuccess={handleLeaveSubmitSuccess} />;
     }

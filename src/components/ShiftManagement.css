@@ -1,0 +1,94 @@
+.shift-management {
+  padding: 0 8px 24px;
+}
+
+.shift-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.shift-tab-header {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0 8px;
+}
+
+.no-data-text {
+  color: var(--ion-color-medium);
+  text-align: center;
+  padding: 24px 0;
+  font-size: 0.9rem;
+}
+
+/* ── Grid Table ── */
+.shift-grid {
+  margin-top: 8px;
+  font-size: 0.875rem;
+}
+
+.shift-grid-header {
+  background: var(--ion-color-light);
+  border-radius: 6px;
+  padding: 6px 0;
+  font-weight: 600;
+  color: var(--ion-color-medium-shade);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.shift-grid-row {
+  border-bottom: 1px solid var(--ion-color-light);
+  align-items: center;
+  padding: 8px 0;
+}
+
+.shift-grid-row:last-child {
+  border-bottom: none;
+}
+
+.shift-name {
+  font-weight: 500;
+}
+
+.inactive-badge {
+  margin-left: 6px;
+  font-size: 0.7rem;
+}
+
+.shift-actions {
+  display: flex;
+  gap: 0;
+}
+
+/* ── Assignments tab ── */
+.assignments-hint {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin: 12px 0 8px;
+  line-height: 1.5;
+}
+
+.assignments-list {
+  margin-top: 4px;
+}
+
+.assignment-item {
+  --padding-start: 0;
+}
+
+.shift-select {
+  max-width: 240px;
+  font-size: 0.875rem;
+}
+
+.assigned-badge {
+  margin-left: 8px;
+  font-size: 0.75rem;
+}
+
+/* ── Modal ── */
+.modal-save-btn {
+  margin: 24px 16px;
+}
