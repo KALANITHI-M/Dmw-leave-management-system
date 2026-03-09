@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
+import leaveBalanceRoutes from './routes/leaveBalanceRoutes.js';
 import profileChangeRequestRoutes from './routes/profileChangeRequestRoutes.js';
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/leaves', leaveRoutes);
+app.use('/api/leave-balance', leaveBalanceRoutes);
 app.use('/api/profile-change-requests', profileChangeRequestRoutes);
 
 app.get('/', (req, res) => {

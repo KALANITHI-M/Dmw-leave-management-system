@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonCard,
   IonCardHeader,
@@ -13,15 +13,15 @@ import {
   IonButton,
   IonRadioGroup,
   IonRadio,
-  IonCheckbox,
   IonGrid,
   IonRow,
   IonCol,
   IonLoading,
   IonToast,
   IonDatetime,
+  IonBadge,
 } from '@ionic/react';
-import { leaveService, LeaveApplication } from '../api/leaveService';
+import { leaveService, LeaveApplication, LeaveBalance } from '../api/leaveService';
 import './LeaveApplicationForm.css';
 
 interface LeaveApplicationFormProps {
@@ -34,42 +34,78 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
 
+  const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
+
+  useEffect(() => {
+    leaveService.getMyBalance().then(setLeaveBalance).catch(() => {});
+  }, []);
+
+  const getRemainingDays = (type: string): number | null => {
+    if (!leaveBalance) return null;
+    const entry = leaveBalance.balances.find((b) => b.leaveType === type);
+    if (!entry) return null;
+    return Math.round((entry.allocated - entry.used - entry.pending) * 2) / 2;
+  };
+
+  const getBalanceColor = (remaining: number | null, allocated: number | undefined) => {
+    if (remaining === null) return 'medium';
+    if (remaining <= 0) return 'danger';
+    if (allocated !== undefined && remaining <= allocated * 0.3) return 'warning';
+    return 'success';
+  };
+
+  type ShiftType = 'full' | 'first-half' | 'second-half';
+
   const [formData, setFormData] = useState({
     leaveType: '',
     dayType: 'single',
     fromDate: '',
     toDate: '',
-    session: [] as string[],
+    shift: 'full' as ShiftType,
+    multiStartShift: 'full' as ShiftType,
+    multiEndShift: 'full' as ShiftType,
     reason: '',
     description: '',
   });
 
-  const sessionHours = [
-    '1st Hour', '2nd Hour', '3rd Hour', '4th Hour', '5th Hour',
-    '6th Hour', '7th Hour', '8th Hour', '9th Hour'
-  ];
+  const shiftLabel = (shift: ShiftType) => {
+    switch (shift) {
+      case 'first-half':
+        return 'First Half';
+      case 'second-half':
+        return 'Second Half';
+      default:
+        return 'Full Day';
+    }
+  };
+
+  const getInclusiveDateDiffDays = (startISO: string, endISO: string) => {
+    const start = new Date(startISO);
+    const end = new Date(endISO);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
 
   const calculateDays = () => {
     if (formData.dayType === 'single') {
-      return formData.session.length > 0 ? 0.5 : 1;
+      return formData.shift === 'full' ? 1 : 0.5;
     }
     if (formData.fromDate && formData.toDate) {
-      const start = new Date(formData.fromDate);
-      const end = new Date(formData.toDate);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      return diffDays;
+      const diffDays = getInclusiveDateDiffDays(formData.fromDate, formData.toDate);
+
+      // If user selects same start & end date in multi-day mode, interpret it like a single-day leave
+      // using the start shift selection.
+      if (diffDays === 1) {
+        return formData.multiStartShift === 'full' ? 1 : 0.5;
+      }
+
+      let numberOfDays = diffDays;
+      if (formData.multiStartShift !== 'full') numberOfDays -= 0.5;
+      if (formData.multiEndShift !== 'full') numberOfDays -= 0.5;
+
+      return Math.max(0.5, numberOfDays);
     }
     return 0;
-  };
-
-  const handleSessionToggle = (hour: string) => {
-    setFormData(prev => ({
-      ...prev,
-      session: prev.session.includes(hour)
-        ? prev.session.filter(h => h !== hour)
-        : [...prev.session, hour]
-    }));
   };
 
   const handleSubmit = async () => {
@@ -102,14 +138,31 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
       return;
     }
 
+    // Frontend balance guard (backend will also reject if insufficient)
     const numberOfDays = calculateDays();
+    const remaining = getRemainingDays(formData.leaveType);
+    if (remaining !== null && remaining < numberOfDays) {
+      setToastMessage(
+        `Insufficient balance. You have ${remaining} day(s) remaining for ${formData.leaveType}.`
+      );
+      setToastColor('danger');
+      setShowToast(true);
+      return;
+    }
+
+    const shiftPrefix =
+      formData.dayType === 'single'
+        ? `${shiftLabel(formData.shift)} - `
+        : formData.fromDate && formData.toDate
+          ? `Start: ${shiftLabel(formData.multiStartShift)}, End: ${shiftLabel(formData.multiEndShift)} - `
+          : '';
 
     const leaveData: LeaveApplication = {
       leaveType: formData.leaveType,
       startDate: formData.fromDate,
       endDate: formData.dayType === 'multi' && formData.toDate ? formData.toDate : formData.fromDate,
       numberOfDays,
-      reason: formData.description || formData.reason,
+      reason: `${shiftPrefix}${formData.description || formData.reason}`,
     };
 
     setLoading(true);
@@ -125,7 +178,9 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
         dayType: 'single',
         fromDate: '',
         toDate: '',
-        session: [],
+        shift: 'full',
+        multiStartShift: 'full',
+        multiEndShift: 'full',
         reason: '',
         description: '',
       });
@@ -139,6 +194,8 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
       setShowToast(true);
     } finally {
       setLoading(false);
+      // Refresh balance after submission
+      leaveService.getMyBalance().then(setLeaveBalance).catch(() => {});
     }
   };
 
@@ -172,6 +229,20 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                     <IonSelectOption value="Other">Other</IonSelectOption>
                   </IonSelect>
                 </IonItem>
+
+                {/* Balance indicator for selected leave type */}
+                {formData.leaveType && (() => {
+                  const alloc = leaveBalance?.balances.find(b => b.leaveType === formData.leaveType);
+                  const rem = getRemainingDays(formData.leaveType);
+                  return (
+                    <div className="balance-indicator">
+                      <span className="balance-label">Leave Balance:</span>
+                      <IonBadge color={getBalanceColor(rem, alloc?.allocated)} className="balance-badge">
+                        {rem !== null ? `${rem} / ${alloc?.allocated ?? '—'} days remaining` : 'Loading...'}
+                      </IonBadge>
+                    </div>
+                  );
+                })()}
               </IonCol>
             </IonRow>
 
@@ -181,7 +252,16 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                 <IonLabel className="form-label section-label">DAY</IonLabel>
                 <IonRadioGroup
                   value={formData.dayType}
-                  onIonChange={(e) => setFormData({ ...formData, dayType: e.detail.value, toDate: '', session: [] })}
+                  onIonChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      dayType: e.detail.value,
+                      toDate: '',
+                      shift: 'full',
+                      multiStartShift: 'full',
+                      multiEndShift: 'full',
+                    })
+                  }
                   className="day-type-radio"
                 >
                   <IonItem lines="none">
@@ -195,6 +275,65 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                 </IonRadioGroup>
               </IonCol>
             </IonRow>
+
+            {/* Shift (for multi day) */}
+            {formData.dayType === 'multi' && (
+              <IonRow>
+                <IonCol size="12" sizeMd="6">
+                  <IonLabel className="form-label section-label">FROM SESSION</IonLabel>
+                  <IonRadioGroup
+                    value={formData.multiStartShift}
+                    onIonChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        multiStartShift: e.detail.value,
+                      })
+                    }
+                    className="shift-type-radio"
+                  >
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="full" />
+                      <IonLabel>Full Day</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="first-half" />
+                      <IonLabel>First Half</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="second-half" />
+                      <IonLabel>Second Half</IonLabel>
+                    </IonItem>
+                  </IonRadioGroup>
+                </IonCol>
+
+                <IonCol size="12" sizeMd="6">
+                  <IonLabel className="form-label section-label">TO SESSION</IonLabel>
+                  <IonRadioGroup
+                    value={formData.multiEndShift}
+                    onIonChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        multiEndShift: e.detail.value,
+                      })
+                    }
+                    className="shift-type-radio"
+                  >
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="full" />
+                      <IonLabel>Full Day</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="first-half" />
+                      <IonLabel>First Half</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="second-half" />
+                      <IonLabel>Second Half</IonLabel>
+                    </IonItem>
+                  </IonRadioGroup>
+                </IonCol>
+              </IonRow>
+            )}
 
             {/* Leave Date(s) */}
             <IonRow>
@@ -227,22 +366,36 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
               )}
             </IonRow>
 
-            {/* Session (for single day only) */}
+            {/* Shift (for single day only) */}
             {formData.dayType === 'single' && (
               <IonRow>
                 <IonCol size="12">
-                  <IonLabel className="form-label section-label">SESSION <span className="optional">(Optional for hourly leave)</span></IonLabel>
-                  <div className="session-grid">
-                    {sessionHours.map((hour) => (
-                      <div key={hour} className="session-checkbox">
-                        <IonCheckbox
-                          checked={formData.session.includes(hour)}
-                          onIonChange={() => handleSessionToggle(hour)}
-                        />
-                        <IonLabel className="session-label">{hour}</IonLabel>
-                      </div>
-                    ))}
-                  </div>
+                  <IonLabel className="form-label section-label">
+                    SHIFT <span className="optional">(IT standard)</span>
+                  </IonLabel>
+                  <IonRadioGroup
+                    value={formData.shift}
+                    onIonChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        shift: e.detail.value,
+                      })
+                    }
+                    className="shift-type-radio"
+                  >
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="full" />
+                      <IonLabel>Full Day</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="first-half" />
+                      <IonLabel>First Half</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio slot="start" value="second-half" />
+                      <IonLabel>Second Half</IonLabel>
+                    </IonItem>
+                  </IonRadioGroup>
                 </IonCol>
               </IonRow>
             )}

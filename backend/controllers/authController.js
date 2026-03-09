@@ -1,5 +1,6 @@
 import Employee from '../models/Employee.js';
 import { generateToken } from '../utils/jwt.js';
+import { initLeaveBalance } from './leaveBalanceController.js';
 
 // Register new employee
 export const signup = async (req, res) => {
@@ -25,6 +26,9 @@ export const signup = async (req, res) => {
     });
 
     if (employee) {
+      // Initialize annual leave balance for the current year
+      await initLeaveBalance(employee._id, new Date().getFullYear());
+
       res.status(201).json({
         _id: employee._id,
         employeeId: employee.employeeId,

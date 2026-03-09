@@ -59,6 +59,83 @@
   background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
 }
 
+/* Balance section */
+.balances-section {
+  padding: 10px;
+}
+
+.balances-card {
+  margin: 0;
+}
+
+.employee-balance-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.emp-balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.emp-balance-header h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.emp-balance-meta {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.no-data {
+  color: #6c757d;
+  padding: 16px;
+  text-align: center;
+}
+
+/* Shared balance table */
+.balance-table-wrapper {
+  overflow-x: auto;
+}
+
+.balance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.balance-table th {
+  background: #f0f4ff;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.balance-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #343a40;
+}
+
+.balance-table tr:last-child td {
+  border-bottom: none;
+}
+
+.balance-ok   { color: #2dd36f; font-weight: 700; }
+.balance-low  { color: #ffc409; font-weight: 700; }
+.balance-none { color: #eb445a; font-weight: 700; }
+
 .approved-card h2,
 .approved-card p {
   color: #333;

@@ -20,6 +20,7 @@ import {
   IonToast,
   IonButton,
   IonTextarea,
+  IonInput,
   IonModal,
   IonButtons,
   IonMenuButton,
@@ -28,7 +29,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { employeeService, Employee } from '../api/employeeService';
-import { leaveService, Leave } from '../api/leaveService';
+import { leaveService, Leave, LeaveBalance } from '../api/leaveService';
 import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
 import ProfileChangeRequests from '../components/ProfileChangeRequests';
@@ -38,7 +39,7 @@ const HRDashboard: React.FC = () => {
   const { user } = useAuth();
   const history = useHistory();
   
-  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests'>('overview');
+  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests' | 'balances'>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,13 @@ const HRDashboard: React.FC = () => {
   const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null);
   const [leaveAction, setLeaveAction] = useState<'Approved' | 'Rejected'>('Approved');
   const [hrComments, setHrComments] = useState('');
+
+  // Leave balance state
+  const [allBalances, setAllBalances] = useState<LeaveBalance[]>([]);
+  const [showEditBalanceModal, setShowEditBalanceModal] = useState(false);
+  const [editingBalance, setEditingBalance] = useState<LeaveBalance | null>(null);
+  const [editLeaveType, setEditLeaveType] = useState('');
+  const [editAllocated, setEditAllocated] = useState<number>(0);
 
   const [stats, setStats] = useState({
     totalEmployees: 0,
@@ -85,6 +93,9 @@ const HRDashboard: React.FC = () => {
       } else if (activeSection === 'leaves') {
         const leavesData = await leaveService.getAllLeaves();
         setLeaves(leavesData);
+      } else if (activeSection === 'balances') {
+        const balancesData = await leaveService.getAllBalances();
+        setAllBalances(balancesData);
       }
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to load data', 'danger');
@@ -120,6 +131,29 @@ const HRDashboard: React.FC = () => {
       loadData();
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to update leave status', 'danger');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditBalance = (balance: LeaveBalance, leaveType: string, currentAllocated: number) => {
+    setEditingBalance(balance);
+    setEditLeaveType(leaveType);
+    setEditAllocated(currentAllocated);
+    setShowEditBalanceModal(true);
+  };
+
+  const confirmEditBalance = async () => {
+    if (!editingBalance) return;
+    setLoading(true);
+    try {
+      await leaveService.updateAllocated(editingBalance._id, editLeaveType, editAllocated);
+      showMessage('Leave allocation updated successfully', 'success');
+      setShowEditBalanceModal(false);
+      const balancesData = await leaveService.getAllBalances();
+      setAllBalances(balancesData);
+    } catch (error: any) {
+      showMessage(error.response?.data?.message || 'Failed to update allocation', 'danger');
     } finally {
       setLoading(false);
     }
@@ -280,6 +314,78 @@ const HRDashboard: React.FC = () => {
           </div>
         );
 
+      case 'balances':
+        return (
+          <div className="balances-section">
+            <IonCard className="balances-card">
+              <IonCardHeader>
+                <IonCardTitle>Leave Balances — {new Date().getFullYear()} ({allBalances.length} employees)</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                {allBalances.length === 0 ? (
+                  <p className="no-data">No balance records found. Employees are initialised on first login.</p>
+                ) : (
+                  allBalances.map((bal) => {
+                    const emp = bal.employeeId as any;
+                    return (
+                      <IonCard key={bal._id} className="employee-balance-card">
+                        <IonCardContent>
+                          <div className="emp-balance-header">
+                            <div>
+                              <h3>{emp?.name ?? '—'}</h3>
+                              <p className="emp-balance-meta">{emp?.employeeId} | {emp?.department}</p>
+                            </div>
+                          </div>
+                          <div className="balance-table-wrapper">
+                            <table className="balance-table">
+                              <thead>
+                                <tr>
+                                  <th>Leave Type</th>
+                                  <th>Allocated</th>
+                                  <th>Used</th>
+                                  <th>Pending</th>
+                                  <th>Remaining</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {bal.balances.map((b) => {
+                                  const remaining = Math.round((b.allocated - b.used - b.pending) * 2) / 2;
+                                  return (
+                                    <tr key={b.leaveType}>
+                                      <td>{b.leaveType}</td>
+                                      <td>{b.allocated}</td>
+                                      <td>{b.used}</td>
+                                      <td>{b.pending}</td>
+                                      <td className={remaining <= 0 ? 'balance-none' : remaining <= b.allocated * 0.3 ? 'balance-low' : 'balance-ok'}>
+                                        {remaining}
+                                      </td>
+                                      <td>
+                                        <IonButton
+                                          size="small"
+                                          color="primary"
+                                          fill="outline"
+                                          onClick={() => openEditBalance(bal, b.leaveType, b.allocated)}
+                                        >
+                                          Edit
+                                        </IonButton>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </IonCardContent>
+                      </IonCard>
+                    );
+                  })
+                )}
+              </IonCardContent>
+            </IonCard>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -345,6 +451,47 @@ const HRDashboard: React.FC = () => {
                     style={{ marginTop: '20px' }}
                   >
                     Confirm {leaveAction}
+                  </IonButton>
+                </>
+              )}
+            </IonContent>
+          </IonModal>
+
+          {/* Edit Balance Modal */}
+          <IonModal isOpen={showEditBalanceModal} onDidDismiss={() => setShowEditBalanceModal(false)}>
+            <IonHeader>
+              <IonToolbar>
+                <IonTitle>Edit Allocation</IonTitle>
+                <IonButtons slot="end">
+                  <IonButton onClick={() => setShowEditBalanceModal(false)}>Close</IonButton>
+                </IonButtons>
+              </IonToolbar>
+            </IonHeader>
+            <IonContent className="ion-padding" scrollY={true}>
+              {editingBalance && (
+                <>
+                  <IonCard>
+                    <IonCardContent>
+                      <p><strong>Employee:</strong> {(editingBalance.employeeId as any)?.name}</p>
+                      <p><strong>Leave Type:</strong> {editLeaveType}</p>
+                    </IonCardContent>
+                  </IonCard>
+                  <IonItem>
+                    <IonLabel position="stacked">Allocated Days</IonLabel>
+                    <IonInput
+                      type="number"
+                      value={editAllocated}
+                      min={0}
+                      onIonInput={(e) => setEditAllocated(Number(e.detail.value) || 0)}
+                    />
+                  </IonItem>
+                  <IonButton
+                    expand="block"
+                    color="primary"
+                    onClick={confirmEditBalance}
+                    style={{ marginTop: '20px' }}
+                  >
+                    Save
                   </IonButton>
                 </>
               )}

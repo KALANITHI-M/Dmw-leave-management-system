@@ -1,10 +1,33 @@
 import Leave from '../models/Leave.js';
 import Employee from '../models/Employee.js';
+import LeaveBalance from '../models/LeaveBalance.js';
+import { initLeaveBalance } from './leaveBalanceController.js';
 
 // Apply for leave (Employee)
 export const applyLeave = async (req, res) => {
   try {
     const { leaveType, startDate, endDate, numberOfDays, reason } = req.body;
+
+    // ── Balance check ──────────────────────────────────────────────────────
+    const year = new Date(startDate).getFullYear();
+    let balance = await LeaveBalance.findOne({ employeeId: req.user._id, year });
+    if (!balance) balance = await initLeaveBalance(req.user._id, year);
+
+    const entry = balance.balances.find((b) => b.leaveType === leaveType);
+    if (!entry) return res.status(400).json({ message: 'Invalid leave type' });
+
+    const remaining = entry.allocated - entry.used - entry.pending;
+    if (remaining < numberOfDays) {
+      return res.status(400).json({
+        message: `Insufficient leave balance. You have ${remaining} day(s) remaining for ${leaveType}.`,
+        remainingBalance: remaining,
+      });
+    }
+
+    // Reserve as pending
+    entry.pending = Math.round((entry.pending + numberOfDays) * 2) / 2;
+    await balance.save();
+    // ───────────────────────────────────────────────────────────────────────
 
     const leave = await Leave.create({
       employeeId: req.user._id,
@@ -92,15 +115,36 @@ export const updateLeaveStatus = async (req, res) => {
     const leave = await Leave.findById(req.params.id);
 
     if (leave) {
+      const prevStatus = leave.status;
       leave.status = status;
       leave.hrComments = hrComments || leave.hrComments;
-      
+
       if (status === 'Approved' || status === 'Rejected') {
         leave.approvedBy = req.user._id;
         leave.approvedDate = new Date();
       }
 
       const updatedLeave = await leave.save();
+
+      // ── Balance update ────────────────────────────────────────────────────
+      if (prevStatus === 'Pending') {
+        const year = new Date(leave.startDate).getFullYear();
+        const balance = await LeaveBalance.findOne({ employeeId: leave.employeeId, year });
+        if (balance) {
+          const entry = balance.balances.find((b) => b.leaveType === leave.leaveType);
+          if (entry) {
+            // Remove from pending in all cases
+            entry.pending = Math.max(0, Math.round((entry.pending - leave.numberOfDays) * 2) / 2);
+            if (status === 'Approved') {
+              // Deduct from annual allocation
+              entry.used = Math.round((entry.used + leave.numberOfDays) * 2) / 2;
+            }
+            await balance.save();
+          }
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       const populatedLeave = await Leave.findById(updatedLeave._id)
         .populate('employeeId', 'name employeeId email department')
         .populate('approvedBy', 'name employeeId');
@@ -123,6 +167,17 @@ export const deleteLeave = async (req, res) => {
     if (leave) {
       // Only allow deletion if pending and by the employee who created it or HR
       if (leave.status === 'Pending' && (leave.employeeId.toString() === req.user._id.toString() || req.user.role === 'hr')) {
+        // Restore pending balance before deleting
+        const year = new Date(leave.startDate).getFullYear();
+        const balance = await LeaveBalance.findOne({ employeeId: leave.employeeId, year });
+        if (balance) {
+          const entry = balance.balances.find((b) => b.leaveType === leave.leaveType);
+          if (entry) {
+            entry.pending = Math.max(0, Math.round((entry.pending - leave.numberOfDays) * 2) / 2);
+            await balance.save();
+          }
+        }
+
         await Leave.deleteOne({ _id: req.params.id });
         res.json({ message: 'Leave application deleted successfully' });
       } else {

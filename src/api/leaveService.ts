@@ -51,6 +51,20 @@ export interface LeaveStatusUpdate {
   hrComments?: string;
 }
 
+export interface LeaveBalanceEntry {
+  leaveType: string;
+  allocated: number;
+  used: number;
+  pending: number;
+}
+
+export interface LeaveBalance {
+  _id: string;
+  employeeId: string;
+  year: number;
+  balances: LeaveBalanceEntry[];
+}
+
 export const leaveService = {
   applyLeave: async (data: LeaveApplication): Promise<Leave> => {
     const response = await api.post<Leave>('/leaves', data);
@@ -85,6 +99,36 @@ export const leaveService = {
 
   getLeaveStats: async (): Promise<LeaveStats> => {
     const response = await api.get<LeaveStats>('/leaves/stats');
+    return response.data;
+  },
+
+  getMyBalance: async (year?: number): Promise<LeaveBalance> => {
+    const url = year ? `/leave-balance/me?year=${year}` : '/leave-balance/me';
+    const response = await api.get<LeaveBalance>(url);
+    return response.data;
+  },
+
+  getAllBalances: async (year?: number): Promise<LeaveBalance[]> => {
+    const url = year ? `/leave-balance?year=${year}` : '/leave-balance';
+    const response = await api.get<LeaveBalance[]>(url);
+    return response.data;
+  },
+
+  getEmployeeBalance: async (empId: string, year?: number): Promise<LeaveBalance> => {
+    const url = year ? `/leave-balance/${empId}?year=${year}` : `/leave-balance/${empId}`;
+    const response = await api.get<LeaveBalance>(url);
+    return response.data;
+  },
+
+  updateAllocated: async (
+    balanceId: string,
+    leaveType: string,
+    allocated: number
+  ): Promise<LeaveBalance> => {
+    const response = await api.put<LeaveBalance>(`/leave-balance/${balanceId}`, {
+      leaveType,
+      allocated,
+    });
     return response.data;
   },
 };

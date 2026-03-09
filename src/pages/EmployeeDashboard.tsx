@@ -18,7 +18,7 @@ import {
 } from '@ionic/react';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
-import { leaveService, Leave } from '../api/leaveService';
+import { leaveService, Leave, LeaveBalance } from '../api/leaveService';
 import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
 import LeaveApplicationForm from '../components/LeaveApplicationForm';
@@ -43,6 +43,8 @@ const EmployeeDashboard: React.FC = () => {
     rejectedLeaves: 0,
   });
 
+  const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
+
   useEffect(() => {
     loadLeaves();
   }, []);
@@ -50,12 +52,14 @@ const EmployeeDashboard: React.FC = () => {
   const loadLeaves = async () => {
     setLoading(true);
     try {
-      const [leavesData, statsData] = await Promise.all([
+      const [leavesData, statsData, balanceData] = await Promise.all([
         leaveService.getMyLeaves(),
         leaveService.getLeaveStats(),
+        leaveService.getMyBalance(),
       ]);
       setMyLeaves(leavesData);
       setStats(statsData);
+      setLeaveBalance(balanceData);
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to load leaves', 'danger');
     } finally {
@@ -102,6 +106,7 @@ const EmployeeDashboard: React.FC = () => {
         return (
           <div className="dashboard-content">
             <IonGrid>
+              {/* Leave stats */}
               <IonRow>
                 <IonCol size="12" sizeMd="6" sizeLg="3">
                   <IonCard className="stat-card total-card">
@@ -136,6 +141,50 @@ const EmployeeDashboard: React.FC = () => {
                   </IonCard>
                 </IonCol>
               </IonRow>
+
+              {/* Leave balance summary */}
+              {leaveBalance && (
+                <IonRow>
+                  <IonCol size="12">
+                    <IonCard className="balance-summary-card">
+                      <IonCardContent>
+                        <h3 className="balance-summary-title">
+                          Leave Balance — {leaveBalance.year}
+                        </h3>
+                        <div className="balance-table-wrapper">
+                          <table className="balance-table">
+                            <thead>
+                              <tr>
+                                <th>Leave Type</th>
+                                <th>Allocated</th>
+                                <th>Used</th>
+                                <th>Pending</th>
+                                <th>Remaining</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {leaveBalance.balances.map((b) => {
+                                const remaining = Math.round((b.allocated - b.used - b.pending) * 2) / 2;
+                                return (
+                                  <tr key={b.leaveType}>
+                                    <td>{b.leaveType}</td>
+                                    <td>{b.allocated}</td>
+                                    <td>{b.used}</td>
+                                    <td>{b.pending}</td>
+                                    <td className={remaining <= 0 ? 'balance-none' : remaining <= b.allocated * 0.3 ? 'balance-low' : 'balance-ok'}>
+                                      {remaining}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </IonCardContent>
+                    </IonCard>
+                  </IonCol>
+                </IonRow>
+              )}
             </IonGrid>
           </div>
         );
