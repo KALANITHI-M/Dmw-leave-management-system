@@ -161,7 +161,8 @@ const ProfileChangeRequests: React.FC = () => {
                             <IonRow>
                               <IonCol size="12" sizeMd="8">
                                 <IonLabel>
-                                  <h2>Employee ID: {request.employeeId}</h2>
+                                  <h2>{typeof request.requestedBy === 'object' ? request.requestedBy.name : request.currentData.name}</h2>
+                                  <p className="emp-balance-meta">{request.currentData.department}</p>
                                   <p>
                                     <strong>Requested Changes:</strong>
                                   </p>
@@ -208,7 +209,8 @@ const ProfileChangeRequests: React.FC = () => {
                             <IonRow>
                               <IonCol size="12" sizeMd="10">
                                 <IonLabel>
-                                  <h2>Employee ID: {request.employeeId}</h2>
+                                  <h2>{typeof request.requestedBy === 'object' ? request.requestedBy.name : request.currentData.name}</h2>
+                                  <p className="emp-balance-meta">{request.currentData.department}</p>
                                   <p>
                                     <strong>Changes:</strong>
                                   </p>

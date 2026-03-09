@@ -3,7 +3,7 @@ import api from './axios';
 export interface ProfileChangeRequest {
   _id?: string;
   employeeId: string;
-  requestedBy: string;
+  requestedBy: { _id: string; name: string; employeeId: string } | string;
   requestedChanges: {
     name?: string;
     email?: string;

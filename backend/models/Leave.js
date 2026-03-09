@@ -45,6 +45,10 @@ const leaveSchema = new mongoose.Schema(
     approvedDate: {
       type: Date,
     },
+    proofUrl: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

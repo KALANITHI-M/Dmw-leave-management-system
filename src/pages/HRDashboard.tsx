@@ -25,7 +25,9 @@ import {
   IonButtons,
   IonMenuButton,
   IonSplitPane,
+  IonIcon,
 } from '@ionic/react';
+import { chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { employeeService, Employee } from '../api/employeeService';
@@ -55,6 +57,7 @@ const HRDashboard: React.FC = () => {
 
   // Leave balance state
   const [allBalances, setAllBalances] = useState<LeaveBalance[]>([]);
+  const [expandedBalanceId, setExpandedBalanceId] = useState<string | null>(null);
   const [showEditBalanceModal, setShowEditBalanceModal] = useState(false);
   const [editingBalance, setEditingBalance] = useState<LeaveBalance | null>(null);
   const [editLeaveType, setEditLeaveType] = useState('');
@@ -286,6 +289,24 @@ const HRDashboard: React.FC = () => {
                               <strong>HR Comments:</strong> {leave.hrComments}
                             </p>
                           )}
+                          {leave.proofUrl && (
+                            <div className="leave-proof">
+                              <strong>Proof: </strong>
+                              {/\.(jpg|jpeg|png)$/i.test(leave.proofUrl) ? (
+                                <a href={`http://localhost:5000${leave.proofUrl}`} target="_blank" rel="noreferrer">
+                                  <img
+                                    src={`http://localhost:5000${leave.proofUrl}`}
+                                    alt="Leave proof"
+                                    className="leave-proof-thumb"
+                                  />
+                                </a>
+                              ) : (
+                                <a href={`http://localhost:5000${leave.proofUrl}`} target="_blank" rel="noreferrer" className="leave-proof-link">
+                                  View PDF Proof
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                         {leave.status === 'Pending' && (
                           <div className="leave-actions">
@@ -327,57 +348,64 @@ const HRDashboard: React.FC = () => {
                 ) : (
                   allBalances.map((bal) => {
                     const emp = bal.employeeId as any;
+                    const isExpanded = expandedBalanceId === bal._id;
                     return (
-                      <IonCard key={bal._id} className="employee-balance-card">
-                        <IonCardContent>
-                          <div className="emp-balance-header">
-                            <div>
-                              <h3>{emp?.name ?? '—'}</h3>
-                              <p className="emp-balance-meta">{emp?.employeeId} | {emp?.department}</p>
+                      <div key={bal._id} className="emp-accordion">
+                        <div
+                          className={`emp-accordion-header${isExpanded ? ' expanded' : ''}`}
+                          onClick={() => setExpandedBalanceId(isExpanded ? null : bal._id)}
+                        >
+                          <div className="emp-accordion-info">
+                            <span className="emp-accordion-name">{emp?.name ?? '—'}</span>
+                            <span className="emp-accordion-meta">{emp?.employeeId} · {emp?.department}</span>
+                          </div>
+                          <IonIcon icon={isExpanded ? chevronUpOutline : chevronDownOutline} className="emp-accordion-chevron" />
+                        </div>
+                        {isExpanded && (
+                          <div className="emp-accordion-body">
+                            <div className="balance-table-wrapper">
+                              <table className="balance-table">
+                                <thead>
+                                  <tr>
+                                    <th>Leave Type</th>
+                                    <th>Allocated</th>
+                                    <th>Used</th>
+                                    <th>Pending</th>
+                                    <th>Remaining</th>
+                                    <th>Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {bal.balances.map((b) => {
+                                    const remaining = Math.round((b.allocated - b.used - b.pending) * 2) / 2;
+                                    return (
+                                      <tr key={b.leaveType}>
+                                        <td>{b.leaveType}</td>
+                                        <td>{b.allocated}</td>
+                                        <td>{b.used}</td>
+                                        <td>{b.pending}</td>
+                                        <td className={remaining <= 0 ? 'balance-none' : remaining <= b.allocated * 0.3 ? 'balance-low' : 'balance-ok'}>
+                                          {remaining}
+                                        </td>
+                                        <td>
+                                          <IonButton
+                                            size="small"
+                                            color="primary"
+                                            fill="outline"
+                                            onClick={(e) => { e.stopPropagation(); openEditBalance(bal, b.leaveType, b.allocated); }}
+                                          >
+                                            Edit
+                                          </IonButton>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           </div>
-                          <div className="balance-table-wrapper">
-                            <table className="balance-table">
-                              <thead>
-                                <tr>
-                                  <th>Leave Type</th>
-                                  <th>Allocated</th>
-                                  <th>Used</th>
-                                  <th>Pending</th>
-                                  <th>Remaining</th>
-                                  <th>Action</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {bal.balances.map((b) => {
-                                  const remaining = Math.round((b.allocated - b.used - b.pending) * 2) / 2;
-                                  return (
-                                    <tr key={b.leaveType}>
-                                      <td>{b.leaveType}</td>
-                                      <td>{b.allocated}</td>
-                                      <td>{b.used}</td>
-                                      <td>{b.pending}</td>
-                                      <td className={remaining <= 0 ? 'balance-none' : remaining <= b.allocated * 0.3 ? 'balance-low' : 'balance-ok'}>
-                                        {remaining}
-                                      </td>
-                                      <td>
-                                        <IonButton
-                                          size="small"
-                                          color="primary"
-                                          fill="outline"
-                                          onClick={() => openEditBalance(bal, b.leaveType, b.allocated)}
-                                        >
-                                          Edit
-                                        </IonButton>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </IonCardContent>
-                      </IonCard>
+                        )}
+                      </div>
                     );
                   })
                 )}

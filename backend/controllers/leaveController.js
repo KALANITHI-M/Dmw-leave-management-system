@@ -2,6 +2,48 @@ import Leave from '../models/Leave.js';
 import Employee from '../models/Employee.js';
 import LeaveBalance from '../models/LeaveBalance.js';
 import { initLeaveBalance } from './leaveBalanceController.js';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, '../uploads/leave-proofs'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `proof-${req.user._id}-${Date.now()}${ext}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowed = /jpeg|jpg|png|pdf/;
+  if (allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPG, PNG, PDF files are allowed'));
+  }
+};
+
+export const uploadProofMiddleware = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }).single('proof');
+
+// POST /api/leaves/:id/proof  (Employee — upload proof for a leave)
+export const uploadProof = async (req, res) => {
+  try {
+    const leave = await Leave.findById(req.params.id);
+    if (!leave) return res.status(404).json({ message: 'Leave not found' });
+    if (leave.employeeId.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: 'Not authorized' });
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    leave.proofUrl = `/uploads/leave-proofs/${req.file.filename}`;
+    await leave.save();
+    res.json({ proofUrl: leave.proofUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Apply for leave (Employee)
 export const applyLeave = async (req, res) => {

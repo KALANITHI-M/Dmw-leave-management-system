@@ -1,4 +1,5 @@
 import LeaveBalance from '../models/LeaveBalance.js';
+import Employee from '../models/Employee.js';
 import { LEAVE_TYPES, LEAVE_POLICY } from '../config/leavePolicy.js';
 
 // ─── Helper (also used by leaveController & authController) ─────────────────
@@ -33,6 +34,11 @@ export const getMyBalance = async (req, res) => {
 export const getAllBalances = async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
+
+    // Ensure every employee has a balance record for this year
+    const allEmployees = await Employee.find({ role: 'employee' }).select('_id');
+    await Promise.all(allEmployees.map((emp) => initLeaveBalance(emp._id, year)));
+
     const balances = await LeaveBalance.find({ year }).populate(
       'employeeId',
       'name employeeId department designation'

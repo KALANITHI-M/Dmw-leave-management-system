@@ -152,6 +152,46 @@
   height: 36px;
 }
 
+/* Proof upload */
+.proof-upload-section {
+  padding: 14px 16px;
+  background: #fff8e1;
+  border: 2px dashed #ffc409;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.proof-upload-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.proof-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6c757d;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.proof-file-input {
+  display: block;
+  width: 100%;
+  font-size: 0.875rem;
+  color: #343a40;
+}
+
+.proof-file-name {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #2dd36f;
+  font-weight: 500;
+}
+
 .form-actions {
   margin-top: 24px;
   display: flex;

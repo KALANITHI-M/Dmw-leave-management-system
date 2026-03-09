@@ -7,6 +7,8 @@ import {
   updateLeaveStatus,
   deleteLeave,
   getLeaveStats,
+  uploadProof,
+  uploadProofMiddleware,
 } from '../controllers/leaveController.js';
 import { protect, hrOnly } from '../middleware/auth.js';
 
@@ -19,5 +21,6 @@ router.get('/stats', protect, getLeaveStats);
 router.get('/:id', protect, getLeaveById);
 router.put('/:id/status', protect, hrOnly, updateLeaveStatus);
 router.delete('/:id', protect, deleteLeave);
+router.post('/:id/proof', protect, uploadProofMiddleware, uploadProof);
 
 export default router;

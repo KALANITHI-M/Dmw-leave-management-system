@@ -35,6 +35,8 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
   const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
 
   const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const proofInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     leaveService.getMyBalance().then(setLeaveBalance).catch(() => {});
@@ -140,6 +142,15 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
 
     // Frontend balance guard (backend will also reject if insufficient)
     const numberOfDays = calculateDays();
+
+    // Require proof for 5+ day leaves
+    if (numberOfDays >= 5 && !proofFile) {
+      setToastMessage('Please upload a proof document for leaves of 5 or more days.');
+      setToastColor('danger');
+      setShowToast(true);
+      return;
+    }
+
     const remaining = getRemainingDays(formData.leaveType);
     if (remaining !== null && remaining < numberOfDays) {
       setToastMessage(
@@ -167,7 +178,22 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
 
     setLoading(true);
     try {
-      await leaveService.applyLeave(leaveData);
+      const createdLeave = await leaveService.applyLeave(leaveData);
+
+      // Upload proof if provided (only shown when days >= 5)
+      if (proofFile && createdLeave._id) {
+        try {
+          await leaveService.uploadProof(createdLeave._id, proofFile);
+        } catch {
+          // leave was submitted; proof upload failed silently — notify user
+          setToastMessage('Leave submitted but proof upload failed. You can contact HR.');
+          setToastColor('danger');
+          setShowToast(true);
+          setTimeout(() => { onSuccess(); }, 2000);
+          return;
+        }
+      }
+
       setToastMessage('Leave application submitted successfully!');
       setToastColor('success');
       setShowToast(true);
@@ -184,6 +210,8 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
         reason: '',
         description: '',
       });
+      setProofFile(null);
+      if (proofInputRef.current) proofInputRef.current.value = '';
 
       setTimeout(() => {
         onSuccess();
@@ -436,6 +464,30 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                 </IonItem>
               </IonCol>
             </IonRow>
+
+            {/* Proof of Leave (only shown when leave >= 5 days) */}
+            {calculateDays() >= 5 && (
+              <IonRow>
+                <IonCol size="12">
+                  <div className="proof-upload-section">
+                    <p className="proof-upload-label">
+                      PROOF OF LEAVE <span className="required">*</span>
+                      <span className="proof-hint"> (Required for 5+ day leaves — JPG, PNG or PDF, max 5MB)</span>
+                    </p>
+                    <input
+                      ref={proofInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      className="proof-file-input"
+                      onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+                    />
+                    {proofFile && (
+                      <p className="proof-file-name">Selected: {proofFile.name}</p>
+                    )}
+                  </div>
+                </IonCol>
+              </IonRow>
+            )}
 
             {/* Submit Button */}
             <IonRow>

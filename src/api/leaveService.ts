@@ -23,6 +23,7 @@ export interface Leave {
     name: string;
   };
   approvedDate?: string;
+  proofUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -128,6 +129,15 @@ export const leaveService = {
     const response = await api.put<LeaveBalance>(`/leave-balance/${balanceId}`, {
       leaveType,
       allocated,
+    });
+    return response.data;
+  },
+
+  uploadProof: async (leaveId: string, file: File): Promise<{ proofUrl: string }> => {
+    const formData = new FormData();
+    formData.append('proof', file);
+    const response = await api.post<{ proofUrl: string }>(`/leaves/${leaveId}/proof`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
