@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
   ],
   build: {
-    target: 'es2020',
+    target: 'es2019',
     sourcemap: false,
     minify: 'esbuild',
     chunkSizeWarningLimit: 2000,
