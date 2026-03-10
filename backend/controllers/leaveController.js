@@ -86,6 +86,23 @@ export const applyLeave = async (req, res) => {
     }
     // ──────────────────────────────────────────────────────────────────────
 
+    // ── Duplicate / overlap check ──────────────────────────────────────────
+    // Block if the employee already has a Pending or Approved leave that
+    // overlaps the requested date range. Only rejected leaves are ignored.
+    const overlapping = await Leave.findOne({
+      employeeId: req.user._id,
+      status: { $in: ['Pending', 'Approved'] },
+      startDate: { $lte: eDate },
+      endDate:   { $gte: sDate },
+    });
+    if (overlapping) {
+      const overlapStatus = overlapping.status.toLowerCase();
+      return res.status(400).json({
+        message: `You already have a ${overlapStatus} leave request for this date range (${new Date(overlapping.startDate).toLocaleDateString('en-GB')} – ${new Date(overlapping.endDate).toLocaleDateString('en-GB')}). You can only apply again if it is rejected by HR.`,
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
     // ── Balance check ──────────────────────────────────────────────────────
     const year = new Date(startDate).getFullYear();
     let balance = await LeaveBalance.findOne({ employeeId: req.user._id, year });
