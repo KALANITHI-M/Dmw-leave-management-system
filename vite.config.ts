@@ -18,12 +18,13 @@ export default defineConfig({
     rollupOptions: {
       maxParallelFileOps: 1,
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules/@ionic')) return 'vendor-ionic';
-          if (id.includes('node_modules/ionicons')) return 'vendor-ionic';
-          if (id.includes('node_modules/html5-qrcode')) return 'vendor-qr';
+      manualChunks(id) {
+          if (id.includes('node_modules/@ionic') || id.includes('node_modules/ionicons')) return 'vendor-ionic';
+          if (id.includes('node_modules/html5-qrcode') || id.includes('node_modules/qrcode')) return 'vendor-qr';
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) return 'vendor-react';
           if (id.includes('node_modules/react')) return 'vendor-react';
-          if (id.includes('node_modules')) return 'vendor';
+          if (id.includes('node_modules/axios')) return 'vendor-http';
+          if (id.includes('node_modules')) return 'vendor-misc';
         },
       },
     },

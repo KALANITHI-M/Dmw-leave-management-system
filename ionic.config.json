@@ -3,5 +3,8 @@
   "integrations": {
     "capacitor": {}
   },
-  "type": "react-vite"
+  "type": "react-vite",
+  "buildOptions": {
+    "engine": "npm"
+  }
 }
