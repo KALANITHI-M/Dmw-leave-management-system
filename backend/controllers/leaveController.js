@@ -87,18 +87,23 @@ export const applyLeave = async (req, res) => {
     // ──────────────────────────────────────────────────────────────────────
 
     // ── Duplicate / overlap check ──────────────────────────────────────────
-    // Block if the employee already has a Pending or Approved leave that
-    // overlaps the requested date range. Only rejected leaves are ignored.
+    // Normalize to UTC day boundaries to avoid timezone offset issues
+    // (IonDatetime may send "2026-03-10T00:00:00+05:30" which shifts to previous day in UTC)
+    const sDateNorm = new Date(String(startDate).slice(0, 10) + 'T00:00:00.000Z');
+    const eDateNorm = new Date(String(endDate).slice(0, 10)   + 'T23:59:59.999Z');
+
     const overlapping = await Leave.findOne({
       employeeId: req.user._id,
       status: { $in: ['Pending', 'Approved'] },
-      startDate: { $lte: eDate },
-      endDate:   { $gte: sDate },
+      startDate: { $lte: eDateNorm },
+      endDate:   { $gte: sDateNorm },
     });
     if (overlapping) {
       const overlapStatus = overlapping.status.toLowerCase();
+      const s = new Date(overlapping.startDate).toLocaleDateString('en-GB');
+      const e = new Date(overlapping.endDate).toLocaleDateString('en-GB');
       return res.status(400).json({
-        message: `You already have a ${overlapStatus} leave request for this date range (${new Date(overlapping.startDate).toLocaleDateString('en-GB')} – ${new Date(overlapping.endDate).toLocaleDateString('en-GB')}). You can only apply again if it is rejected by HR.`,
+        message: `You already have a ${overlapStatus} leave for this period (${s}${s !== e ? ' – ' + e : ''}). You can only apply again after HR rejects it.`,
       });
     }
     // ──────────────────────────────────────────────────────────────────────
@@ -127,8 +132,9 @@ export const applyLeave = async (req, res) => {
     const leave = await Leave.create({
       employeeId: req.user._id,
       leaveType,
-      startDate,
-      endDate,
+      // Always store as UTC midnight so comparisons are timezone-consistent
+      startDate: new Date(String(startDate).slice(0, 10) + 'T00:00:00.000Z'),
+      endDate:   new Date(String(endDate).slice(0, 10)   + 'T00:00:00.000Z'),
       numberOfDays,
       reason,
       status: 'Pending',
