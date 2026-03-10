@@ -16,11 +16,13 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
+  params: async (req, file) => ({
     folder: 'leave-proofs',
+    // PDFs must use 'raw' so Cloudinary serves them with the correct content-type
+    // Images use 'image' for thumbnail/preview support
+    resource_type: file.mimetype === 'application/pdf' ? 'raw' : 'image',
     allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-    resource_type: 'auto',
-  },
+  }),
 });
 
 const fileFilter = (req, file, cb) => {

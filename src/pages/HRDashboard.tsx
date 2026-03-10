@@ -48,8 +48,15 @@ import './HRDashboard.css';
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
   : 'https://dmw-leave-management-system-w6xv.onrender.com';
-const resolveProofUrl = (url: string) =>
-  url.startsWith('http') ? url : `${BACKEND_BASE_URL}${url}`;
+const resolveProofUrl = (url: string) => {
+  if (!url.startsWith('http')) return `${BACKEND_BASE_URL}${url}`;
+  // Fix Cloudinary PDFs stored under image/upload — change to raw/upload so the
+  // browser receives the correct application/pdf content-type
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/') && url.endsWith('.pdf')) {
+    return url.replace('/image/upload/', '/raw/upload/');
+  }
+  return url;
+};
 
 const HRDashboard: React.FC = () => {
   const { user, logout } = useAuth();
