@@ -5,21 +5,27 @@ import Attendance from '../models/Attendance.js';
 import { initLeaveBalance } from './leaveBalanceController.js';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../uploads/leave-proofs'),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `proof-${req.user._id}-${Date.now()}${ext}`);
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'leave-proofs',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+    resource_type: 'auto',
   },
 });
 
 const fileFilter = (req, file, cb) => {
   const allowed = /jpeg|jpg|png|pdf/;
-  if (allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype)) {
+  if (allowed.test(path.extname(file.originalname).toLowerCase())) {
     cb(null, true);
   } else {
     cb(new Error('Only JPG, PNG, PDF files are allowed'));
@@ -37,7 +43,8 @@ export const uploadProof = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-    leave.proofUrl = `/uploads/leave-proofs/${req.file.filename}`;
+    // Cloudinary returns the full secure URL in req.file.path
+    leave.proofUrl = req.file.path;
     await leave.save();
     res.json({ proofUrl: leave.proofUrl });
   } catch (error) {

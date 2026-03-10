@@ -44,6 +44,13 @@ import ProfileChangeRequests from '../components/ProfileChangeRequests';
 import ShiftManagement from '../components/ShiftManagement';
 import './HRDashboard.css';
 
+// Resolve proof URL: Cloudinary uploads are full URLs; old local paths need the backend host
+const BACKEND_BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
+  : 'https://dmw-leave-management-system-w6xv.onrender.com';
+const resolveProofUrl = (url: string) =>
+  url.startsWith('http') ? url : `${BACKEND_BASE_URL}${url}`;
+
 const HRDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const history = useHistory();
@@ -439,15 +446,15 @@ const HRDashboard: React.FC = () => {
                             <div className="leave-proof">
                               <strong>Proof: </strong>
                               {/\.(jpg|jpeg|png)$/i.test(leave.proofUrl) ? (
-                                <a href={`http://localhost:5000${leave.proofUrl}`} target="_blank" rel="noreferrer">
+                                <a href={resolveProofUrl(leave.proofUrl)} target="_blank" rel="noreferrer">
                                   <img
-                                    src={`http://localhost:5000${leave.proofUrl}`}
+                                    src={resolveProofUrl(leave.proofUrl)}
                                     alt="Leave proof"
                                     className="leave-proof-thumb"
                                   />
                                 </a>
                               ) : (
-                                <a href={`http://localhost:5000${leave.proofUrl}`} target="_blank" rel="noreferrer" className="leave-proof-link">
+                                <a href={resolveProofUrl(leave.proofUrl)} target="_blank" rel="noreferrer" className="leave-proof-link">
                                   View PDF Proof
                                 </a>
                               )}
