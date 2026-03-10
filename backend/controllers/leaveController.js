@@ -6,7 +6,6 @@ import { initLeaveBalance } from './leaveBalanceController.js';
 import multer from 'multer';
 import path from 'path';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,16 +13,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: 'leave-proofs',
-    // PDFs must use 'raw' so Cloudinary serves them with the correct content-type
-    // Images use 'image' for thumbnail/preview support
-    resource_type: file.mimetype === 'application/pdf' ? 'raw' : 'image',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-  }),
-});
+// Store file in memory, then stream to Cloudinary manually for full control
+const memStorage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowed = /jpeg|jpg|png|pdf/;
@@ -34,7 +25,24 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadProofMiddleware = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }).single('proof');
+export const uploadProofMiddleware = multer({ storage: memStorage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }).single('proof');
+
+// Upload buffer to Cloudinary and return secure URL
+const uploadToCloudinary = (buffer, mimetype) =>
+  new Promise((resolve, reject) => {
+    const isPdf = mimetype === 'application/pdf';
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'leave-proofs',
+        resource_type: isPdf ? 'raw' : 'image',
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(buffer);
+  });
 
 // POST /api/leaves/:id/proof  (Employee — upload proof for a leave)
 export const uploadProof = async (req, res) => {
@@ -45,12 +53,12 @@ export const uploadProof = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-    // Cloudinary returns the full secure URL in req.file.path
-    leave.proofUrl = req.file.path;
+    const secureUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+    leave.proofUrl = secureUrl;
     await leave.save();
     res.json({ proofUrl: leave.proofUrl });
   } catch (error) {
-    console.error(error);
+    console.error('Proof upload error:', error);
     res.status(500).json({ message: error.message });
   }
 };
