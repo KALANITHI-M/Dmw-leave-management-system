@@ -15,15 +15,29 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 }) => {
   const { user, isAuthenticated } = useAuth();
 
+  let persistedUser = user;
+  if (!persistedUser) {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        persistedUser = JSON.parse(storedUser);
+      } catch {
+        localStorage.removeItem('user');
+      }
+    }
+  }
+
+  const canAccess = isAuthenticated || !!persistedUser;
+
   return (
     <Route
       {...rest}
       render={(props) => {
-        if (!isAuthenticated) {
+        if (!canAccess) {
           return <Redirect to="/login" />;
         }
 
-        if (role && user?.role !== role) {
+        if (role && persistedUser?.role !== role) {
           return <Redirect to="/login" />;
         }
 

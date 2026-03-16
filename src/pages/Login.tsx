@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import {
   IonContent,
   IonPage,
@@ -29,10 +30,12 @@ const Login: React.FC = () => {
   const history = useHistory();
   const { login } = useAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeLogin = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!email || !password) {
+    console.log('[DEBUG] executeLogin triggered for user:', normalizedEmail);
+
+    if (!normalizedEmail || !password) {
       setToastMessage('Please fill in all fields');
       setShowToast(true);
       return;
@@ -40,17 +43,26 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      const userData = await authService.login({ email, password });
+      const userData = await authService.login({ email: normalizedEmail, password });
       login(userData);
+
+      const activeElement = document.activeElement as HTMLElement | null;
+      activeElement?.blur();
       
       if (userData.role === 'hr') {
-        history.push('/hr/dashboard');
+        history.replace('/hr/dashboard');
       } else {
-        history.push('/employee/dashboard');
+        history.replace('/employee/dashboard');
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setToastMessage(error.response?.data?.message || 'Login failed. Please try again.');
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message ||
+          (error.code === 'ERR_NETWORK'
+            ? 'Cannot connect to server. Please check your internet or backend URL.'
+            : 'Login failed. Please try again.')
+        : 'Login failed. Please try again.';
+      setToastMessage(message);
       setShowToast(true);
     } finally {
       setLoading(false);
@@ -72,7 +84,7 @@ const Login: React.FC = () => {
 
 <IonCard className="login-card">
   <IonCardContent>
-    <form onSubmit={handleLogin}>
+    <form onSubmit={(e) => { e.preventDefault(); executeLogin(); }}>
       <IonItem lines="none" className="input-item">
         <IonIcon icon={mailOutline} slot="start" className="input-icon" />
         <IonLabel position="stacked" className="input-label">Email</IonLabel>
@@ -105,7 +117,7 @@ const Login: React.FC = () => {
         />
       </IonItem>
 
-      <IonButton expand="block" onClick={handleLogin} className="login-button">
+      <IonButton expand="block" type="submit" className="login-button">
         Login
       </IonButton>
 

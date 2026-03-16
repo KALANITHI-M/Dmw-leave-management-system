@@ -60,8 +60,8 @@ const Signup: React.FC = () => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeSignup = async () => {
+    console.log('[DEBUG] executeSignup triggered for user:', formData.email);
 
     // Basic validation (you can replace with your existing logic)
     if (
@@ -150,7 +150,7 @@ const Signup: React.FC = () => {
 
           <IonCard className="signup-card">
             <IonCardContent>
-              <form onSubmit={handleSignup}>
+              <form onSubmit={(e) => { e.preventDefault(); executeSignup(); }}>
                 <IonItem lines="none" className="input-item">
                   <IonIcon icon={idCardOutline} slot="start" className="input-icon" />
                   <IonLabel position="stacked" className="input-label">Employee ID</IonLabel>
@@ -292,7 +292,7 @@ const Signup: React.FC = () => {
                   />
                 </IonItem>
 
-                <IonButton expand="block" onClick={handleSignup} className="signup-button">
+                <IonButton expand="block" type="button" onClick={() => executeSignup()} className="signup-button">
                   Sign Up
                 </IonButton>
 
