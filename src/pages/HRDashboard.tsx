@@ -42,6 +42,7 @@ import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
 import ProfileChangeRequests from '../components/ProfileChangeRequests';
 import ShiftManagement from '../components/ShiftManagement';
+import HRTaskManagement from './HRTaskManagement';
 import './HRDashboard.css';
 
 // Resolve proof URL: Cloudinary uploads are full URLs; old local paths need the backend host
@@ -62,7 +63,7 @@ const HRDashboard: React.FC = () => {
   const { logout } = useAuth();
   const history = useHistory();
   
-  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests' | 'balances' | 'attendance' | 'shifts'>('overview');
+  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests' | 'balances' | 'attendance' | 'shifts' | 'tasks'>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1034,6 +1035,9 @@ const HRDashboard: React.FC = () => {
 
       case 'shifts':
         return <ShiftManagement />;
+
+      case 'tasks':
+        return <HRTaskManagement />;
 
       default:
         return null;

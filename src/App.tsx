@@ -6,6 +6,10 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import HRDashboard from './pages/HRDashboard';
+import TaskDetail from './pages/TaskDetail';
+import CreateTask from './pages/CreateTask';
+import HRTaskManagement from './pages/HRTaskManagement';
+import MyTasks from './components/MyTasks';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -98,6 +102,30 @@ const App: React.FC = () => (
               path="/employee/dashboard"
               component={EmployeeDashboard}
               role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/my-tasks"
+              component={MyTasks}
+              role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/task/:id"
+              component={TaskDetail}
+              role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/create-task"
+              component={CreateTask}
+              role="hr"
+            />
+            <PrivateRoute
+              exact
+              path="/hr/tasks"
+              component={HRTaskManagement}
+              role="hr"
             />
             <PrivateRoute
               exact

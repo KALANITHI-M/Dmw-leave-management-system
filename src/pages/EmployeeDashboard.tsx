@@ -25,10 +25,11 @@ import AttendanceCheckIn from '../components/AttendanceCheckIn';
 import AttendanceReport from '../components/AttendanceReport';
 import MyShift from '../components/MyShift';
 import AttendanceRegularization from '../components/AttendanceRegularization';
+import MyTasks from '../components/MyTasks';
 import './EmployeeDashboard.css';
 
 const EmployeeDashboard: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'profile' | 'apply-leave' | 'applied-leaves' | 'dashboard' | 'attendance' | 'attendance-report' | 'my-shift' | 'attendance-regularization'>('apply-leave');
+  const [activeSection, setActiveSection] = useState<'profile' | 'apply-leave' | 'applied-leaves' | 'dashboard' | 'attendance' | 'attendance-report' | 'my-shift' | 'attendance-regularization' | 'my-tasks'>('apply-leave');
   const [myLeaves, setMyLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -202,6 +203,9 @@ const EmployeeDashboard: React.FC = () => {
 
       case 'attendance-regularization':
         return <AttendanceRegularization />;
+
+      case 'my-tasks':
+        return <MyTasks />;
 
       default:
         return <LeaveApplicationForm onSuccess={handleLeaveSubmitSuccess} />;

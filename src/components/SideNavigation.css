@@ -43,6 +43,8 @@
 .nav-list {
   background: transparent;
   padding: 8px 0;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .nav-section-header {
@@ -58,10 +60,22 @@
 .nav-item {
   --background: transparent;
   --padding-start: 16px;
-  margin: 2px 8px;
+  margin: 4px 8px !important;
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.2s ease;
+  min-height: 48px !important;
+  --min-height: 48px !important;
+}
+
+.nav-item::part(native) {
+  padding-right: 16px !important;
+}
+
+.nav-item ion-label {
+  white-space: normal !important;
+  word-break: break-word !important;
+  max-width: calc(100% - 40px);
 }
 
 .nav-item:hover {

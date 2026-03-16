@@ -28,6 +28,7 @@ import {
   barChartOutline,
   timeOutline,
   alertCircleOutline,
+  clipboardOutline,
 } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -214,6 +215,21 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                   <IonLabel>Attendance Correction</IonLabel>
                 </IonItem>
               </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Tasks</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'my-tasks' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('my-tasks')}
+                >
+                  <IonIcon icon={clipboardOutline} slot="start" />
+                  <IonLabel>My Tasks</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
             </>
           )}
 
@@ -287,6 +303,17 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                 >
                   <IonIcon icon={calendarOutline} slot="start" />
                   <IonLabel>Attendance</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'tasks' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('tasks')}
+                >
+                  <IonIcon icon={clipboardOutline} slot="start" />
+                  <IonLabel>Task Management</IonLabel>
                 </IonItem>
               </IonMenuToggle>
 
