@@ -1,6 +1,6 @@
 import axiosInstance from './axios';
 
-const TASKS_API = '/api/tasks';
+const TASKS_API = '/tasks';
 
 interface TaskFilters {
   status?: string;
