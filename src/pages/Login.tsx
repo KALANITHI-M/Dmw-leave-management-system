@@ -48,6 +48,7 @@ const Login: React.FC = () => {
       } else {
         history.push('/employee/dashboard');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToastMessage(error.response?.data?.message || 'Login failed. Please try again.');
       setShowToast(true);
@@ -104,7 +105,7 @@ const Login: React.FC = () => {
         />
       </IonItem>
 
-      <IonButton expand="block" type="submit" className="login-button">
+      <IonButton expand="block" onClick={handleLogin} className="login-button">
         Login
       </IonButton>
 

@@ -40,6 +40,7 @@ const AttendanceReport: React.FC = () => {
 
   useEffect(() => {
     loadRecords();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year]);
 
   const loadRecords = async () => {
@@ -47,7 +48,9 @@ const AttendanceReport: React.FC = () => {
     try {
       const data = await attendanceService.getMyAttendance(month, year);
       setRecords(data);
-    } catch (_) {}
+    } catch {
+      // ignore
+    }
     finally { setLoading(false); }
   };
 

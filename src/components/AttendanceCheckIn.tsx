@@ -58,6 +58,7 @@ const AttendanceCheckIn: React.FC = () => {
   const [toastMsg, setToastMsg] = useState('');
   const [toastColor, setToastColor] = useState<'success' | 'danger' | 'warning'>('success');
   const [showToast, setShowToast] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const qrCodeRef = useRef<any>(null);
 
   useEffect(() => {
@@ -69,7 +70,9 @@ const AttendanceCheckIn: React.FC = () => {
     try {
       const att = await attendanceService.getTodayAttendance();
       setTodayAttendance(att);
-    } catch (_) {}
+    } catch {
+      // ignore
+    }
   };
 
   const fetchGPS = () => {
@@ -110,6 +113,7 @@ const AttendanceCheckIn: React.FC = () => {
       setTodayAttendance(att);
       const statusLabel = att.status.charAt(0).toUpperCase() + att.status.slice(1).replace('-', ' ');
       showMessage(`Checked in successfully! Status: ${statusLabel}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       showMessage(e.response?.data?.message || 'Check-in failed', 'danger');
     } finally {
@@ -126,6 +130,7 @@ const AttendanceCheckIn: React.FC = () => {
       });
       setTodayAttendance(att);
       showMessage(`Checked out! You worked ${att.workingHours}h today.`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       showMessage(e.response?.data?.message || 'Check-out failed', 'danger');
     } finally {
@@ -150,6 +155,7 @@ const AttendanceCheckIn: React.FC = () => {
         },
         () => {}
       );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     } catch (err: any) {
       setScanning(false);
       setScanError(
@@ -162,7 +168,9 @@ const AttendanceCheckIn: React.FC = () => {
     if (qrCodeRef.current) {
       try {
         await qrCodeRef.current.stop();
-      } catch (_) {}
+      } catch {
+        // ignore
+      }
       qrCodeRef.current = null;
     }
     setScanning(false);

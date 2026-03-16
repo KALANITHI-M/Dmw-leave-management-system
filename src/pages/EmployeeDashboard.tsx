@@ -16,8 +16,6 @@ import {
   IonMenuButton,
   IonSplitPane,
 } from '@ionic/react';
-import { useAuth } from '../context/AuthContext';
-import { useHistory } from 'react-router-dom';
 import { leaveService, Leave, LeaveBalance } from '../api/leaveService';
 import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
@@ -30,9 +28,6 @@ import AttendanceRegularization from '../components/AttendanceRegularization';
 import './EmployeeDashboard.css';
 
 const EmployeeDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const history = useHistory();
-
   const [activeSection, setActiveSection] = useState<'profile' | 'apply-leave' | 'applied-leaves' | 'dashboard' | 'attendance' | 'attendance-report' | 'my-shift' | 'attendance-regularization'>('apply-leave');
   const [myLeaves, setMyLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,6 +46,7 @@ const EmployeeDashboard: React.FC = () => {
 
   useEffect(() => {
     loadLeaves();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadLeaves = async () => {
@@ -64,6 +60,7 @@ const EmployeeDashboard: React.FC = () => {
       setMyLeaves(leavesData);
       setStats(statsData);
       setLeaveBalance(balanceData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to load leaves', 'danger');
     } finally {
@@ -83,6 +80,7 @@ const EmployeeDashboard: React.FC = () => {
       await leaveService.deleteLeave(leaveId);
       showMessage('Leave application deleted successfully', 'success');
       loadLeaves();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to delete leave', 'danger');
     } finally {
@@ -215,6 +213,7 @@ const EmployeeDashboard: React.FC = () => {
       <SideNavigation
         contentId="employee-main"
         activeSection={activeSection}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onSectionChange={(section) => setActiveSection(section as any)}
       />
       

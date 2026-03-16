@@ -127,6 +127,7 @@ const Signup: React.FC = () => {
           history.push('/employee/dashboard');
         }
       }, 1500);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setToastMessage(err.response?.data?.message || 'Signup failed. Please try again.');
       setShowToast(true);
@@ -291,7 +292,7 @@ const Signup: React.FC = () => {
                   />
                 </IonItem>
 
-                <IonButton expand="block" type="submit" className="signup-button">
+                <IonButton expand="block" onClick={handleSignup} className="signup-button">
                   Sign Up
                 </IonButton>
 

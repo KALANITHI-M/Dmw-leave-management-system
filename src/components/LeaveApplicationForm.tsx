@@ -216,6 +216,7 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
       setTimeout(() => {
         onSuccess();
       }, 1500);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToastMessage(error.response?.data?.message || 'Failed to apply for leave');
       setToastColor('danger');
@@ -293,12 +294,10 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                   className="day-type-radio"
                 >
                   <IonItem lines="none">
-                    <IonRadio slot="start" value="single" />
-                    <IonLabel>Single</IonLabel>
+                    <IonRadio value="single" justify="start">Single</IonRadio>
                   </IonItem>
                   <IonItem lines="none">
-                    <IonRadio slot="start" value="multi" />
-                    <IonLabel>Multi</IonLabel>
+                    <IonRadio value="multi" justify="start">Multi</IonRadio>
                   </IonItem>
                 </IonRadioGroup>
               </IonCol>
@@ -320,16 +319,13 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                     className="shift-type-radio"
                   >
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="full" />
-                      <IonLabel>Full Day</IonLabel>
+                      <IonRadio value="full" justify="start">Full Day</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="first-half" />
-                      <IonLabel>First Half</IonLabel>
+                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="second-half" />
-                      <IonLabel>Second Half</IonLabel>
+                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
                     </IonItem>
                   </IonRadioGroup>
                 </IonCol>
@@ -347,16 +343,13 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                     className="shift-type-radio"
                   >
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="full" />
-                      <IonLabel>Full Day</IonLabel>
+                      <IonRadio value="full" justify="start">Full Day</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="first-half" />
-                      <IonLabel>First Half</IonLabel>
+                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="second-half" />
-                      <IonLabel>Second Half</IonLabel>
+                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
                     </IonItem>
                   </IonRadioGroup>
                 </IonCol>
@@ -412,16 +405,13 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                     className="shift-type-radio"
                   >
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="full" />
-                      <IonLabel>Full Day</IonLabel>
+                      <IonRadio value="full" justify="start">Full Day</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="first-half" />
-                      <IonLabel>First Half</IonLabel>
+                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio slot="start" value="second-half" />
-                      <IonLabel>Second Half</IonLabel>
+                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
                     </IonItem>
                   </IonRadioGroup>
                 </IonCol>

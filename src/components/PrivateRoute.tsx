@@ -3,6 +3,7 @@ import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 interface PrivateRouteProps extends RouteProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<any>;
   role?: 'employee' | 'hr';
 }

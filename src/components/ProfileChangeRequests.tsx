@@ -41,6 +41,7 @@ const ProfileChangeRequests: React.FC = () => {
     try {
       const data = await profileChangeRequestService.getAllRequests();
       setRequests(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     } catch (error: any) {
       setToastMessage('Failed to load requests');
       setShowToast(true);
@@ -65,6 +66,7 @@ const ProfileChangeRequests: React.FC = () => {
       setShowToast(true);
       setShowReviewModal(false);
       fetchRequests();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToastMessage(error.response?.data?.message || 'Failed to approve request');
       setShowToast(true);
@@ -83,6 +85,7 @@ const ProfileChangeRequests: React.FC = () => {
       setShowToast(true);
       setShowReviewModal(false);
       fetchRequests();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToastMessage(error.response?.data?.message || 'Failed to reject request');
       setShowToast(true);

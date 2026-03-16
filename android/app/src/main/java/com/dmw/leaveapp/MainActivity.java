@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.dmw.leaveapp;
 
 import com.getcapacitor.BridgeActivity;
 

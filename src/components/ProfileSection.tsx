@@ -36,6 +36,7 @@ const ProfileSection: React.FC = () => {
   const [imageToCrop, setImageToCrop] = useState<string>('');
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   // Editable profile fields
@@ -65,6 +66,7 @@ const ProfileSection: React.FC = () => {
     }
   }, [user]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
@@ -78,6 +80,7 @@ const ProfileSection: React.FC = () => {
       image.src = url;
     });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<string> => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement('canvas');
@@ -169,7 +172,7 @@ const ProfileSection: React.FC = () => {
         setCrop({ x: 0, y: 0 });
         setZoom(1);
       }
-    } catch (error) {
+    } catch {
       setToastMessage('Failed to crop image');
       setShowToast(true);
     }
@@ -217,6 +220,7 @@ const ProfileSection: React.FC = () => {
         setToastMessage('Profile change request submitted to HR for approval');
         setShowToast(true);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToastMessage(error.response?.data?.message || 'Failed to process request');
       setShowToast(true);

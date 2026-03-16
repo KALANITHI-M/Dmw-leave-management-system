@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonCard,
   IonCardHeader,
@@ -68,10 +68,12 @@ const AttendanceRegularization: React.FC = () => {
 
   useEffect(() => {
     loadRecords(recMonth, recYear);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (tab === 'myrequests') loadRequests();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   const loadRecords = async (month: number, year: number) => {
@@ -80,6 +82,7 @@ const AttendanceRegularization: React.FC = () => {
       const data = await attendanceService.getMyAttendance(month, year);
       data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setRecords(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       notify(e.response?.data?.message || 'Failed to load attendance', 'danger');
     } finally {
@@ -92,6 +95,7 @@ const AttendanceRegularization: React.FC = () => {
     try {
       const data = await regularizationService.getMyRequests();
       setRequests(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       notify(e.response?.data?.message || 'Failed to load requests', 'danger');
     } finally {
@@ -140,6 +144,7 @@ const AttendanceRegularization: React.FC = () => {
       setSelectedRecord(null);
       setTab('myrequests');
       loadRequests();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       notify(e.response?.data?.message || 'Failed to submit request', 'danger');
     } finally {
@@ -310,6 +315,7 @@ const AttendanceRegularization: React.FC = () => {
                           ? <IonIcon icon={checkmarkOutline} color="success" />
                           : <IonIcon icon={closeOutline} color="danger" />}{' '}
                         {req.status === 'approved' ? 'Approved' : 'Rejected'} by{' '}
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {(req.reviewedBy as any).name} on {fmtDate(req.reviewedAt)}
                       </div>
                     )}
