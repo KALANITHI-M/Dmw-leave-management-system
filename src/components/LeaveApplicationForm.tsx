@@ -239,7 +239,7 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
             {/* Leave Type */}
             <IonRow>
               <IonCol size="12">
-                <IonItem className="form-item">
+                <IonItem className="form-item leave-type-item">
                   <IonLabel position="stacked" className="form-label">
                     LEAVE TYPE <span className="required">*</span>
                   </IonLabel>
@@ -303,59 +303,6 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
               </IonCol>
             </IonRow>
 
-            {/* Shift (for multi day) */}
-            {formData.dayType === 'multi' && (
-              <IonRow>
-                <IonCol size="12" sizeMd="6">
-                  <IonLabel className="form-label section-label">FROM SESSION</IonLabel>
-                  <IonRadioGroup
-                    value={formData.multiStartShift}
-                    onIonChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        multiStartShift: e.detail.value,
-                      })
-                    }
-                    className="shift-type-radio"
-                  >
-                    <IonItem lines="none">
-                      <IonRadio value="full" justify="start">Full Day</IonRadio>
-                    </IonItem>
-                    <IonItem lines="none">
-                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
-                    </IonItem>
-                    <IonItem lines="none">
-                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
-                    </IonItem>
-                  </IonRadioGroup>
-                </IonCol>
-
-                <IonCol size="12" sizeMd="6">
-                  <IonLabel className="form-label section-label">TO SESSION</IonLabel>
-                  <IonRadioGroup
-                    value={formData.multiEndShift}
-                    onIonChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        multiEndShift: e.detail.value,
-                      })
-                    }
-                    className="shift-type-radio"
-                  >
-                    <IonItem lines="none">
-                      <IonRadio value="full" justify="start">Full Day</IonRadio>
-                    </IonItem>
-                    <IonItem lines="none">
-                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
-                    </IonItem>
-                    <IonItem lines="none">
-                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
-                    </IonItem>
-                  </IonRadioGroup>
-                </IonCol>
-              </IonRow>
-            )}
-
             {/* Leave Date(s) */}
             <IonRow>
               <IonCol size="12" sizeMd="6">
@@ -387,6 +334,59 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
               )}
             </IonRow>
 
+            {/* Session (for multi day only) */}
+            {formData.dayType === 'multi' && (
+              <IonRow className="session-row">
+                <IonCol size="12" sizeMd="6">
+                  <IonLabel className="form-label section-label">FROM SESSION</IonLabel>
+                  <IonRadioGroup
+                    value={formData.multiStartShift}
+                    onIonChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        multiStartShift: e.detail.value,
+                      })
+                    }
+                    className="shift-type-radio"
+                  >
+                    <IonItem lines="none">
+                      <IonRadio value="full" justify="start">Full Day</IonRadio>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio value="first-half" justify="start">First Shift</IonRadio>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio value="second-half" justify="start">Second Shift</IonRadio>
+                    </IonItem>
+                  </IonRadioGroup>
+                </IonCol>
+
+                <IonCol size="12" sizeMd="6">
+                  <IonLabel className="form-label section-label">TO SESSION</IonLabel>
+                  <IonRadioGroup
+                    value={formData.multiEndShift}
+                    onIonChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        multiEndShift: e.detail.value,
+                      })
+                    }
+                    className="shift-type-radio"
+                  >
+                    <IonItem lines="none">
+                      <IonRadio value="full" justify="start">Full Day</IonRadio>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio value="first-half" justify="start">First Shift</IonRadio>
+                    </IonItem>
+                    <IonItem lines="none">
+                      <IonRadio value="second-half" justify="start">Second Shift</IonRadio>
+                    </IonItem>
+                  </IonRadioGroup>
+                </IonCol>
+              </IonRow>
+            )}
+
             {/* Shift (for single day only) */}
             {formData.dayType === 'single' && (
               <IonRow>
@@ -408,10 +408,10 @@ const LeaveApplicationForm: React.FC<LeaveApplicationFormProps> = ({ onSuccess }
                       <IonRadio value="full" justify="start">Full Day</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio value="first-half" justify="start">First Half</IonRadio>
+                      <IonRadio value="first-half" justify="start">First Shift</IonRadio>
                     </IonItem>
                     <IonItem lines="none">
-                      <IonRadio value="second-half" justify="start">Second Half</IonRadio>
+                      <IonRadio value="second-half" justify="start">Second Shift</IonRadio>
                     </IonItem>
                   </IonRadioGroup>
                 </IonCol>

@@ -3,24 +3,29 @@
 }
 
 .create-task-container {
-  max-width: 600px;
+  width: 100%;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 0;
+  padding: 1rem 0.5rem 2rem;
 }
 
 /* Cards */
-ion-card {
+.create-task-content ion-card {
   border-top: 3px solid #ff6600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
+  margin: 0 0 1.25rem;
+}
+
+.create-task-content ion-card:last-of-type {
   margin-bottom: 1.5rem;
 }
 
-ion-card-header {
+.create-task-content ion-card-header {
   padding: 1.5rem;
 }
 
-ion-card-title {
+.create-task-content ion-card-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: #1a1a1a;
@@ -34,47 +39,69 @@ ion-card-title {
   font-weight: 500;
 }
 
-ion-card-content {
+.required {
+  color: #d32f2f;
+}
+
+.create-task-content ion-card-content {
   padding: 0 1.5rem 1.5rem;
 }
 
-ion-card.has-error ion-card-header {
+.create-task-content ion-card.has-error ion-card-header {
   border-bottom: 2px solid #d32f2f;
 }
 
 /* Form Items */
-ion-item {
+.create-task-content ion-item {
   --padding-start: 0;
   --padding-end: 0;
   --inner-padding-end: 0;
+  --inner-padding-top: 0.45rem;
+  --inner-padding-bottom: 0.45rem;
   border-bottom: 1px solid #eee;
   margin-bottom: 1rem;
 }
 
-ion-item:last-child {
+.create-task-content ion-item:last-child {
   border-bottom: none;
   margin-bottom: 0;
 }
 
-ion-item.has-error {
+.create-task-content ion-item.has-error {
   --highlight-color-invalid: #d32f2f;
 }
 
-ion-item ion-label {
+.create-task-content ion-item ion-label {
   color: #555;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
-ion-input,
-ion-textarea,
-ion-select {
+.create-task-content ion-input,
+.create-task-content ion-textarea,
+.create-task-content ion-select {
   font-size: 1rem;
   color: #1a1a1a;
 }
 
-ion-input::placeholder,
-ion-textarea::placeholder {
+.create-task-content .priority-item {
+  --inner-padding-top: 0.35rem;
+  --inner-padding-bottom: 0.35rem;
+}
+
+.create-task-content .priority-item ion-label {
+  margin-bottom: 0.45rem;
+}
+
+.create-task-content .priority-item ion-select {
+  width: 100%;
+  min-height: 44px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+.create-task-content ion-input::placeholder,
+.create-task-content ion-textarea::placeholder {
   color: #ccc;
 }
 
@@ -139,7 +166,7 @@ ion-textarea::placeholder {
   margin-bottom: 2rem;
 }
 
-ion-button {
+.create-task-content ion-button {
   --border-radius: 8px;
   --padding-start: 1rem;
   --padding-end: 1rem;
@@ -157,32 +184,33 @@ ion-button {
   --box-shadow: 0 6px 16px rgba(255, 102, 0, 0.4);
 }
 
-ion-button[color='success'] {
+.create-task-content ion-button[color='success'] {
   --color: #388e3c;
   background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
   --color: white;
 }
 
-ion-button[color='medium'] {
+.create-task-content ion-button[color='medium'] {
   --color: #666;
 }
 
-ion-button[color='danger'] {
+.create-task-content ion-button[color='danger'] {
   --color: #d32f2f;
 }
 
 /* Loading State */
-ion-spinner {
+.create-task-content ion-spinner {
   margin-right: 0.5rem;
 }
 
 /* Responsive */
 @media (max-width: 640px) {
   .create-task-container {
-    padding: 0;
+    max-width: 100%;
+    padding: 0 0 1.25rem;
   }
 
-  ion-card {
+  .create-task-content ion-card {
     margin-left: 0;
     margin-right: 0;
     border-radius: 8px;
@@ -192,7 +220,7 @@ ion-spinner {
     max-height: 250px;
   }
 
-  ion-button {
+  .create-task-content ion-button {
     --padding-start: 0.8rem;
     --padding-end: 0.8rem;
   }

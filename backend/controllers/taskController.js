@@ -1,6 +1,7 @@
 import Task from '../models/Task.js';
 import TaskComment from '../models/TaskComment.js';
 import Employee from '../models/Employee.js';
+import mongoose from 'mongoose';
 
 // Create a new task (Manager/Admin only)
 export const createTask = async (req, res) => {
@@ -8,20 +9,57 @@ export const createTask = async (req, res) => {
     const { title, description, assignedTo, priority, startDate, dueDate } = req.body;
     const createdBy = req.user._id;
 
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: 'Task title is required' });
+    }
+
+    if (!description || !description.trim()) {
+      return res.status(400).json({ message: 'Task description is required' });
+    }
+
+    if (!Array.isArray(assignedTo) || assignedTo.length === 0) {
+      return res.status(400).json({ message: 'Select at least one employee' });
+    }
+
+    const uniqueAssignees = [...new Set(assignedTo)];
+    const hasInvalidId = uniqueAssignees.some((id) => !mongoose.Types.ObjectId.isValid(id));
+    if (hasInvalidId) {
+      return res.status(400).json({ message: 'Invalid employee selection' });
+    }
+
+    if (!startDate || !dueDate) {
+      return res.status(400).json({ message: 'Start date and due date are required' });
+    }
+
+    const parsedStartDate = new Date(startDate);
+    const parsedDueDate = new Date(dueDate);
+
+    if (Number.isNaN(parsedStartDate.getTime()) || Number.isNaN(parsedDueDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid start date or due date' });
+    }
+
+    if (parsedDueDate < parsedStartDate) {
+      return res.status(400).json({ message: 'Due date must be after start date' });
+    }
+
     // Validate that all assigned employees exist
-    const employees = await Employee.find({ _id: { $in: assignedTo } });
-    if (employees.length !== assignedTo.length) {
-      return res.status(400).json({ message: 'One or more assigned employees not found' });
+    const employees = await Employee.find({
+      _id: { $in: uniqueAssignees },
+      role: 'employee',
+      isActive: { $ne: false },
+    });
+    if (employees.length !== uniqueAssignees.length) {
+      return res.status(400).json({ message: 'One or more selected employees are invalid or inactive' });
     }
 
     const task = new Task({
-      title,
-      description,
-      assignedTo,
+      title: title.trim(),
+      description: description.trim(),
+      assignedTo: uniqueAssignees,
       createdBy,
       priority,
-      startDate: new Date(startDate),
-      dueDate: new Date(dueDate),
+      startDate: parsedStartDate,
+      dueDate: parsedDueDate,
     });
 
     await task.save();
@@ -29,6 +67,14 @@ export const createTask = async (req, res) => {
 
     res.status(201).json({ message: 'Task created successfully', task });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: Object.values(error.errors)
+          .map((err) => err.message)
+          .join(', '),
+      });
+    }
+
     res.status(500).json({ message: 'Error creating task', error: error.message });
   }
 };

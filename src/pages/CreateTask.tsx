@@ -34,6 +34,8 @@ interface Employee {
   name: string;
   designation: string;
   email: string;
+  role?: 'employee' | 'hr';
+  isActive?: boolean;
 }
 
 const CreateTask: React.FC = () => {
@@ -63,7 +65,11 @@ const CreateTask: React.FC = () => {
     try {
       setLoadingEmployees(true);
       const response: any = await employeeService.getAllEmployees();
-      setEmployees(Array.isArray(response) ? response : response.employees);
+      const allEmployees = Array.isArray(response) ? response : response.employees;
+      const assignableEmployees = (allEmployees || []).filter(
+        (emp: Employee) => emp.role === 'employee' && emp.isActive !== false
+      );
+      setEmployees(assignableEmployees);
     } catch (error: any) {
       showError(error.response?.data?.message || 'Failed to load employees');
     } finally {
@@ -112,7 +118,7 @@ const CreateTask: React.FC = () => {
       await taskService.createTask(taskData);
       showSuccessMessage('Task created successfully');
       setTimeout(() => {
-        history.push('/my-tasks');
+        history.push('/hr/tasks');
       }, 1500);
     } catch (error: any) {
       showError(error.response?.data?.message || 'Failed to create task');
@@ -195,7 +201,9 @@ const CreateTask: React.FC = () => {
             </IonCardHeader>
             <IonCardContent>
               <IonItem className={errors.title ? 'has-error' : ''}>
-                <IonLabel position="floating">Task Title *</IonLabel>
+                <IonLabel position="stacked">
+                  Task Title <span className="required">*</span>
+                </IonLabel>
                 <IonInput
                   value={title}
                   onIonChange={(e) => {
@@ -209,7 +217,9 @@ const CreateTask: React.FC = () => {
               {errors.title && <IonText color="danger" className="error-message">{errors.title}</IonText>}
 
               <IonItem className={errors.description ? 'has-error' : ''}>
-                <IonLabel position="floating">Description *</IonLabel>
+                <IonLabel position="stacked">
+                  Description <span className="required">*</span>
+                </IonLabel>
                 <IonTextarea
                   value={description}
                   onIonChange={(e) => {
@@ -223,8 +233,10 @@ const CreateTask: React.FC = () => {
               </IonItem>
               {errors.description && <IonText color="danger" className="error-message">{errors.description}</IonText>}
 
-              <IonItem>
-                <IonLabel position="floating">Priority *</IonLabel>
+              <IonItem className="priority-item">
+                <IonLabel position="stacked">
+                  Priority <span className="required">*</span>
+                </IonLabel>
                 <IonSelect value={priority} onIonChange={(e) => setPriority(e.detail.value)} disabled={submitting}>
                   <IonSelectOption value="Low">Low</IonSelectOption>
                   <IonSelectOption value="Medium">Medium</IonSelectOption>
@@ -242,7 +254,9 @@ const CreateTask: React.FC = () => {
             </IonCardHeader>
             <IonCardContent>
               <IonItem className={errors.startDate ? 'has-error' : ''}>
-                <IonLabel position="floating">Start Date *</IonLabel>
+                <IonLabel position="stacked">
+                  Start Date <span className="required">*</span>
+                </IonLabel>
                 <IonInput
                   type="date"
                   value={startDate}
@@ -256,7 +270,9 @@ const CreateTask: React.FC = () => {
               {errors.startDate && <IonText color="danger" className="error-message">{errors.startDate}</IonText>}
 
               <IonItem className={errors.dueDate ? 'has-error' : ''}>
-                <IonLabel position="floating">Due Date *</IonLabel>
+                <IonLabel position="stacked">
+                  Due Date <span className="required">*</span>
+                </IonLabel>
                 <IonInput
                   type="date"
                   value={dueDate}
@@ -274,7 +290,9 @@ const CreateTask: React.FC = () => {
           {/* Assign To */}
           <IonCard className={errors.employees ? 'has-error' : ''}>
             <IonCardHeader>
-              <IonCardTitle>Assign To Employees *</IonCardTitle>
+              <IonCardTitle>
+                Assign To Employees <span className="required">*</span>
+              </IonCardTitle>
               <p className="card-subtitle">
                 Selected: {selectedEmployees.length} {selectedEmployees.length === 1 ? 'employee' : 'employees'}
               </p>
@@ -343,7 +361,7 @@ const CreateTask: React.FC = () => {
               expand="block"
               fill="outline"
               color="danger"
-              routerLink="/my-tasks"
+              routerLink="/hr/tasks"
               disabled={submitting}
             >
               Cancel

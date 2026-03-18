@@ -202,6 +202,10 @@ const HRTaskManagement: React.FC = () => {
           </IonButtons>
           <IonTitle>Task Management</IonTitle>
           <IonButtons slot="end">
+            <IonButton routerLink="/create-task" color="primary">
+              <IonIcon slot="start" icon={add} />
+              Create Task
+            </IonButton>
             <IonButton onClick={fetchReports} className="report-btn">
               <IonIcon slot="icon-only" icon={analytics} />
             </IonButton>
@@ -311,6 +315,12 @@ const HRTaskManagement: React.FC = () => {
               <IonText color="medium">
                 <p style={{ textAlign: 'center' }}>No tasks found</p>
               </IonText>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
+                <IonButton color="primary" routerLink="/create-task">
+                  <IonIcon slot="start" icon={add} />
+                  Create Task
+                </IonButton>
+              </div>
             </IonCardContent>
           </IonCard>
         ) : (

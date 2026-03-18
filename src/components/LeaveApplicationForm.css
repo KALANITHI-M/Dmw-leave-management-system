@@ -26,8 +26,13 @@
   --border-width: 1px;
   --border-style: solid;
   --border-radius: 6px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  --inner-padding-top: 10px;
+  --inner-padding-bottom: 10px;
   margin-bottom: 16px;
-  padding: 8px 12px;
 }
 
 .form-label {
@@ -36,7 +41,14 @@
   color: #495057;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.form-item ion-label.form-label {
+  display: block;
+  white-space: normal;
+  overflow: visible;
 }
 
 .section-label {
@@ -62,6 +74,40 @@
   font-size: 0.95rem;
   --padding-start: 0;
   --padding-end: 0;
+  width: 100%;
+}
+
+.leave-type-item {
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
+}
+
+.leave-type-item .form-label {
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  letter-spacing: 0.2px;
+}
+
+.leave-type-item .form-select {
+  width: 100%;
+  min-height: 42px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.form-select,
+.form-input {
+  min-height: 40px;
+}
+
+.form-item ion-datetime {
+  width: 100%;
+  border-radius: 6px;
 }
 
 .day-type-radio {
@@ -73,6 +119,8 @@
 .day-type-radio ion-item {
   --background: transparent;
   --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 32px;
 }
 
 .shift-type-radio {
@@ -84,6 +132,12 @@
 .shift-type-radio ion-item {
   --background: transparent;
   --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 32px;
+}
+
+.session-row {
+  margin-top: 6px;
 }
 
 .textarea-item {
