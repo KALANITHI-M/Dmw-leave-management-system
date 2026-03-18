@@ -5,6 +5,10 @@
   margin-bottom: 24px;
 }
 
+.my-tasks-embedded {
+  width: 100%;
+}
+
 .stat-card {
   padding: 16px;
   border-radius: 12px;
@@ -47,6 +51,18 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+.task-select-dropdown {
+  width: 100%;
+  margin-bottom: 16px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  background: #fff;
 }
 
 .task-card {

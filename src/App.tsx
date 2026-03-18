@@ -7,7 +7,7 @@ import Signup from './pages/Signup';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import HRDashboard from './pages/HRDashboard';
 import TaskDetail from './pages/TaskDetail';
-import CreateTask from './pages/CreateTask';
+import CreateTask from './pages/CreateTaskPage';
 import HRTaskManagement from './pages/HRTaskManagement';
 import MyTasks from './components/MyTasks';
 import PrivateRoute from './components/PrivateRoute';
@@ -68,23 +68,6 @@ setupIonicReact({
   mode: 'md',  // Force Material Design mode — prevents iOS animation system causing ion-page-invisible bug on Android
 });
 
-const observer = new MutationObserver(() => {
-  document.querySelectorAll('.ion-page-invisible, .ion-page-hidden').forEach((el) => {
-    el.classList.remove('ion-page-invisible', 'ion-page-hidden');
-    (el as HTMLElement).style.setProperty('opacity', '1', 'important');
-    (el as HTMLElement).style.setProperty('visibility', 'visible', 'important');
-    (el as HTMLElement).style.setProperty('display', 'block', 'important');
-  });
-  // Also fix any element with opacity 0 set via inline style inside ion-router-outlet
-  const outlet = document.querySelector('ion-router-outlet');
-  if (outlet) {
-    outlet.querySelectorAll('[style*="opacity: 0"], [style*="opacity:0"]').forEach((el) => {
-      (el as HTMLElement).style.setProperty('opacity', '1', 'important');
-    });
-  }
-});
-observer.observe(document.body, { subtree: true, attributes: true, childList: true, attributeFilter: ['class', 'style'] });
-
 
 
 
@@ -94,7 +77,7 @@ const App: React.FC = () => (
     <IonApp>
       <AuthProvider>
         <IonReactRouter>
-          <IonRouterOutlet id="main-outlet" style={{ opacity: 1, visibility: 'visible' }}>
+          <IonRouterOutlet id="main-outlet">
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
             <PrivateRoute

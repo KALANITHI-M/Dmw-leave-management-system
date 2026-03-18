@@ -40,7 +40,11 @@ interface Task {
   createdBy: { name: string };
 }
 
-const MyTasks: React.FC = () => {
+interface MyTasksProps {
+  embedded?: boolean;
+}
+
+const MyTasks: React.FC<MyTasksProps> = ({ embedded = false }) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +53,7 @@ const MyTasks: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [searchText, setSearchText] = useState('');
+  const [selectedTaskId, setSelectedTaskId] = useState('');
 
   useEffect(() => {
     fetchMyTasks();
@@ -114,6 +119,20 @@ const MyTasks: React.FC = () => {
     task.title.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  useEffect(() => {
+    if (selectedTaskId && selectedTaskId !== 'all') {
+      const existsInCurrentList = filteredTasks.some((task) => task._id === selectedTaskId);
+      if (!existsInCurrentList) {
+        setSelectedTaskId('');
+      }
+    }
+  }, [filteredTasks, selectedTaskId]);
+
+  const tasksToDisplay =
+    selectedTaskId === 'all'
+      ? filteredTasks
+      : filteredTasks.filter((task) => task._id === selectedTaskId);
+
   const daysUntilDue = (dueDate: string) => {
     const due = new Date(dueDate);
     const today = new Date();
@@ -130,15 +149,8 @@ const MyTasks: React.FC = () => {
     overdue: tasks.filter((t) => t.status === 'Overdue').length,
   };
 
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>My Tasks</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-
-      <IonContent className="ion-padding">
+  const tasksContent = (
+    <>
         {/* Stats Cards */}
         <div className="stats-grid">
           <div className="stat-card">
@@ -198,6 +210,23 @@ const MyTasks: React.FC = () => {
           </IonSelect>
         </div>
 
+        {/* Task Selector */}
+        {!loading && filteredTasks.length > 0 && (
+          <IonSelect
+            value={selectedTaskId}
+            onIonChange={(e) => setSelectedTaskId(e.detail.value)}
+            placeholder="Select task to view"
+            className="task-select-dropdown"
+          >
+            <IonSelectOption value="all">All Tasks</IonSelectOption>
+            {filteredTasks.map((task) => (
+              <IonSelectOption key={task._id} value={task._id}>
+                {task.title}
+              </IonSelectOption>
+            ))}
+          </IonSelect>
+        )}
+
         {/* Tasks List */}
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '40px' }}>
@@ -211,8 +240,18 @@ const MyTasks: React.FC = () => {
               </IonText>
             </IonCardContent>
           </IonCard>
+        ) : selectedTaskId === '' ? (
+          <IonCard>
+            <IonCardContent>
+              <IonText color="medium">
+                <p style={{ textAlign: 'center', marginTop: '20px' }}>
+                  Select a task from the dropdown to view details
+                </p>
+              </IonText>
+            </IonCardContent>
+          </IonCard>
         ) : (
-          filteredTasks.map((task) => (
+          tasksToDisplay.map((task) => (
             <IonCard key={task._id} className="task-card">
               <IonCardHeader>
                 <div className="task-header">
@@ -285,7 +324,22 @@ const MyTasks: React.FC = () => {
           duration={3000}
           color="danger"
         />
-      </IonContent>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="ion-padding my-tasks-embedded">{tasksContent}</div>;
+  }
+
+  return (
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>My Tasks</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className="ion-padding">{tasksContent}</IonContent>
     </IonPage>
   );
 };

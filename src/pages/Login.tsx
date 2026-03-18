@@ -115,7 +115,7 @@ const Login: React.FC = () => {
       </IonButton>
 
       <div className="signup-link">
-        <IonText>2
+        <IonText>
           Don't have an account?{' '}
           <span onClick={() => history.push('/signup')} className="link">
             Sign Up

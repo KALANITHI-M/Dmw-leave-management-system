@@ -205,7 +205,7 @@ const EmployeeDashboard: React.FC = () => {
         return <AttendanceRegularization />;
 
       case 'my-tasks':
-        return <MyTasks />;
+        return <MyTasks embedded />;
 
       default:
         return <LeaveApplicationForm onSuccess={handleLeaveSubmitSuccess} />;

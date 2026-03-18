@@ -1037,7 +1037,7 @@ const HRDashboard: React.FC = () => {
         return <ShiftManagement />;
 
       case 'tasks':
-        return <HRTaskManagement />;
+        return <HRTaskManagement embedded />;
 
       default:
         return null;

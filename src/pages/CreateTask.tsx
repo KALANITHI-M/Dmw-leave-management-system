@@ -40,6 +40,17 @@ interface Employee {
 
 const CreateTask: React.FC = () => {
   const history = useHistory();
+  
+  // Handle back navigation
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (history.length > 1) {
+      history.goBack();
+    } else {
+      history.push('/hr/dashboard');
+    }
+  };
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
@@ -48,7 +59,6 @@ const CreateTask: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState('danger');
 
-  // Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
@@ -118,7 +128,11 @@ const CreateTask: React.FC = () => {
       await taskService.createTask(taskData);
       showSuccessMessage('Task created successfully');
       setTimeout(() => {
-        history.push('/hr/tasks');
+        if (history.length > 1) {
+          history.goBack();
+        } else {
+          history.push('/hr/dashboard');
+        }
       }, 1500);
     } catch (error: any) {
       showError(error.response?.data?.message || 'Failed to create task');
@@ -163,7 +177,7 @@ const CreateTask: React.FC = () => {
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonButton onClick={() => history.goBack()}>
+              <IonButton onClick={handleBackClick}>
                 <IonIcon slot="icon-only" icon={arrowBack} />
               </IonButton>
             </IonButtons>
@@ -184,7 +198,7 @@ const CreateTask: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={() => history.goBack()}>
+            <IonButton onClick={handleBackClick}>
               <IonIcon slot="icon-only" icon={arrowBack} />
             </IonButton>
           </IonButtons>
@@ -194,7 +208,6 @@ const CreateTask: React.FC = () => {
 
       <IonContent className="ion-padding create-task-content">
         <div className="create-task-container">
-          {/* Title */}
           <IonCard>
             <IonCardHeader>
               <IonCardTitle>Task Information</IonCardTitle>
@@ -247,7 +260,6 @@ const CreateTask: React.FC = () => {
             </IonCardContent>
           </IonCard>
 
-          {/* Dates */}
           <IonCard>
             <IonCardHeader>
               <IonCardTitle>Timeline</IonCardTitle>
@@ -287,7 +299,6 @@ const CreateTask: React.FC = () => {
             </IonCardContent>
           </IonCard>
 
-          {/* Assign To */}
           <IonCard className={errors.employees ? 'has-error' : ''}>
             <IonCardHeader>
               <IonCardTitle>
@@ -324,7 +335,6 @@ const CreateTask: React.FC = () => {
             </IonCardContent>
           </IonCard>
 
-          {/* Action Buttons */}
           <div className="form-actions">
             <IonButton
               expand="block"
@@ -361,7 +371,7 @@ const CreateTask: React.FC = () => {
               expand="block"
               fill="outline"
               color="danger"
-              routerLink="/hr/tasks"
+              onClick={handleBackClick}
               disabled={submitting}
             >
               Cancel
