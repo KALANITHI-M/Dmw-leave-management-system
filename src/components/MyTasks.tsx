@@ -25,6 +25,7 @@ import {
   IonFabButton,
 } from '@ionic/react';
 import { checkmark, close, alert, timerOutline, add } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 import { taskService } from '../api/taskService';
 import { useAuth } from '../context/AuthContext';
 import './MyTasks.css';
@@ -46,6 +47,7 @@ interface MyTasksProps {
 
 const MyTasks: React.FC<MyTasksProps> = ({ embedded = false }) => {
   const { user } = useAuth();
+  const history = useHistory();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
@@ -298,7 +300,7 @@ const MyTasks: React.FC<MyTasksProps> = ({ embedded = false }) => {
                 <IonButton
                   fill="outline"
                   size="small"
-                  routerLink={`/task/${task._id}`}
+                  onClick={() => history.push(`/task/${task._id}`)}
                   expand="block"
                   className="ion-margin-top"
                 >

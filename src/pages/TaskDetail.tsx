@@ -69,6 +69,20 @@ const TaskDetail: React.FC = () => {
   const [newStatus, setNewStatus] = useState('');
   const [updating, setUpdating] = useState(false);
 
+  // Handle back navigation reliably across direct URL loads
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (history.length > 2) {
+      history.goBack();
+    } else {
+      if (user?.role === 'hr') {
+        history.push('/hr/dashboard');
+      } else {
+        history.push('/employee/dashboard');
+      }
+    }
+  };
+
   useEffect(() => {
     fetchTask();
   }, [id]);
@@ -190,7 +204,7 @@ const TaskDetail: React.FC = () => {
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonButton onClick={() => history.goBack()}>
+              <IonButton onClick={handleBackClick}>
                 <IonIcon slot="icon-only" icon={arrowBack} />
               </IonButton>
             </IonButtons>
@@ -212,7 +226,7 @@ const TaskDetail: React.FC = () => {
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonButton onClick={() => history.goBack()}>
+              <IonButton onClick={handleBackClick}>
                 <IonIcon slot="icon-only" icon={arrowBack} />
               </IonButton>
             </IonButtons>
@@ -235,7 +249,7 @@ const TaskDetail: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={() => history.goBack()}>
+            <IonButton onClick={handleBackClick}>
               <IonIcon slot="icon-only" icon={arrowBack} />
             </IonButton>
           </IonButtons>

@@ -96,7 +96,6 @@ const App: React.FC = () => (
               exact
               path="/task/:id"
               component={TaskDetail}
-              role="employee"
             />
             <PrivateRoute
               exact

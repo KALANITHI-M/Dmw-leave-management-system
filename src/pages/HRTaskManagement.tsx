@@ -361,7 +361,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
                   size="small"
                   color="primary"
                   fill="solid"
-                  routerLink={`/task/${task._id}`}
+                  onClick={() => history.push(`/task/${task._id}`)}
                 >
                   View Details
                 </IonButton>
@@ -400,7 +400,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
     return (
       <div className="ion-padding task-management-content">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px', gap: '8px' }}>
-          <IonButton routerLink="/create-task" color="primary">
+          <IonButton onClick={() => history.push('/create-task')} color="primary">
             <IonIcon slot="start" icon={add} />
             Create Task
           </IonButton>
@@ -424,7 +424,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
           </IonButtons>
           <IonTitle>Task Management</IonTitle>
           <IonButtons slot="end">
-            <IonButton routerLink="/create-task" color="primary">
+            <IonButton onClick={() => history.push('/create-task')} color="primary">
               <IonIcon slot="start" icon={add} />
               Create Task
             </IonButton>
