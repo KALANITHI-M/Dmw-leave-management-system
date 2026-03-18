@@ -86,6 +86,14 @@
   color: var(--ion-color-medium);
 }
 
+/* Hide native browser password reveal eye icons that conflict with our custom toggle */
+.custom-input input::-ms-reveal,
+.custom-input input::-ms-clear,
+.custom-input input::-webkit-contacts-auto-fill-button,
+.custom-input input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
 .custom-input {
   font-size: 1rem;
 }

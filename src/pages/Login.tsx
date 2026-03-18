@@ -14,7 +14,7 @@ import {
   IonToast,
   IonIcon,
 } from '@ionic/react';
-import { mailOutline, lockClosedOutline } from 'ionicons/icons';
+import { mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { authService } from '../api/authService';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +23,7 @@ import './Login.css';
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -101,13 +102,16 @@ const Login: React.FC = () => {
         <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
         <IonLabel position="stacked" className="input-label">Password</IonLabel>
         <IonInput
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           value={password}
           onIonInput={(e) => setPassword(e.detail.value!)}
           required
           className="custom-input"
           placeholder="Enter your password"
         />
+        <IonButton fill="clear" slot="end" onClick={() => setShowPassword(!showPassword)} style={{ margin: 0, marginTop: '20px' }}>
+          <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} color="medium" />
+        </IonButton>
       </IonItem>
 
       <IonButton expand="block" type="submit" className="login-button">
