@@ -1,0 +1,358 @@
+import React, { useState } from 'react';
+import {
+  IonContent,
+  IonPage,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonButton,
+  IonLabel,
+  IonInput,
+  IonTextarea,
+  IonItem,
+  IonSelect,
+  IonSelectOption,
+  IonText,
+  IonSpinner,
+  IonIcon,
+  IonToast,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+} from '@ionic/react';
+import { arrowBack, close, cloudUpload } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { serviceTicketService } from '../api/serviceTicketService';
+import './CreateServiceTicket.css';
+
+interface Attachment {
+  file: File;
+  name: string;
+  size: number;
+}
+
+const CreateServiceTicket: React.FC = () => {
+  const history = useHistory();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState('Medium');
+  const [category, setCategory] = useState('Other');
+  const [dueDate, setDueDate] = useState('');
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastColor, setToastColor] = useState('danger');
+
+  const showError = (message: string) => {
+    setToastMessage(message);
+    setToastColor('danger');
+    setShowToast(true);
+  };
+
+  const showSuccessMessage = (message: string) => {
+    setToastMessage(message);
+    setToastColor('success');
+    setShowToast(true);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        showError(`File ${file.name} is too large. Maximum size is 10MB.`);
+        continue;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        showError(`File type not allowed: ${file.name}`);
+        continue;
+      }
+
+      setAttachments((prev) => [
+        ...prev,
+        {
+          file,
+          name: file.name,
+          size: file.size,
+        },
+      ]);
+    }
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleCreateTicket = async () => {
+    // Validation
+    if (!title.trim()) {
+      showError('Please enter a ticket title');
+      return;
+    }
+    if (!description.trim()) {
+      showError('Please enter a ticket description');
+      return;
+    }
+    if (!priority) {
+      showError('Please select a priority level');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('priority', priority);
+      formData.append('category', category);
+      if (dueDate) {
+        formData.append('dueDate', dueDate);
+      }
+
+      // Add attachments
+      attachments.forEach((att) => {
+        formData.append('attachments', att.file);
+      });
+
+      const response = await serviceTicketService.createTicket(formData);
+      showSuccessMessage(`Ticket ${response.ticket.ticketNumber} created successfully!`);
+
+      // Redirect after 1 second
+      setTimeout(() => {
+        history.push('/service-tickets');
+      }, 1000);
+    } catch (error: any) {
+      showError(error.response?.data?.message || 'Failed to create ticket');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton onClick={() => history.goBack()}>
+              <IonIcon slot="icon-only" icon={arrowBack} />
+            </IonButton>
+          </IonButtons>
+          <IonTitle>Create Service Ticket</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className="ion-padding create-ticket-content">
+        <IonCard>
+          <IonCardHeader>
+            <IonCardTitle>Ticket Details</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            {/* Title */}
+            <IonItem>
+              <IonLabel position="stacked">
+                Ticket Title <span style={{ color: 'red' }}>*</span>
+              </IonLabel>
+              <IonInput
+                type="text"
+                placeholder="Enter ticket title"
+                value={title}
+                onIonChange={(e) => setTitle(e.detail.value || '')}
+                disabled={loading}
+              />
+            </IonItem>
+
+            {/* Description */}
+            <IonItem>
+              <IonLabel position="stacked">
+                Description <span style={{ color: 'red' }}>*</span>
+              </IonLabel>
+              <IonTextarea
+                placeholder="Describe the issue or request in detail"
+                value={description}
+                onIonChange={(e) => setDescription(e.detail.value || '')}
+                rows={5}
+                disabled={loading}
+              />
+            </IonItem>
+
+            {/* Priority */}
+            <IonItem>
+              <IonLabel position="stacked">
+                Priority <span style={{ color: 'red' }}>*</span>
+              </IonLabel>
+              <IonSelect
+                value={priority}
+                onIonChange={(e) => setPriority(e.detail.value)}
+                disabled={loading}
+              >
+                <IonSelectOption value="Low">Low</IonSelectOption>
+                <IonSelectOption value="Medium">Medium</IonSelectOption>
+                <IonSelectOption value="High">High</IonSelectOption>
+                <IonSelectOption value="Critical">Critical</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+
+            {/* Category */}
+            <IonItem>
+              <IonLabel position="stacked">Category</IonLabel>
+              <IonSelect
+                value={category}
+                onIonChange={(e) => setCategory(e.detail.value)}
+                disabled={loading}
+              >
+                <IonSelectOption value="Machine Failure">Machine Failure</IonSelectOption>
+                <IonSelectOption value="Maintenance Request">Maintenance Request</IonSelectOption>
+                <IonSelectOption value="Technical Support">Technical Support</IonSelectOption>
+                <IonSelectOption value="Software Issue">Software Issue</IonSelectOption>
+                <IonSelectOption value="Hardware Issue">Hardware Issue</IonSelectOption>
+                <IonSelectOption value="Other">Other</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+
+            {/* Due Date */}
+            <IonItem>
+              <IonLabel position="stacked">Expected Due Date (Optional)</IonLabel>
+              <IonInput
+                type="datetime-local"
+                value={dueDate}
+                onIonChange={(e) => setDueDate(e.detail.value || '')}
+                disabled={loading}
+              />
+            </IonItem>
+          </IonCardContent>
+        </IonCard>
+
+        {/* Attachments Card */}
+        <IonCard>
+          <IonCardHeader>
+            <IonCardTitle>Attachments (Optional)</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonText color="medium">
+              <small>
+                Upload photos or documents (JPG, PNG, PDF, DOCX) - Max 10MB each. Maximum 5 files.
+              </small>
+            </IonText>
+
+            {/* File Input */}
+            <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+              <label
+                style={{
+                  display: 'block',
+                  padding: '2rem',
+                  border: '2px dashed #667eea',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: '#f8f9ff',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <IonIcon
+                  icon={cloudUpload}
+                  style={{ fontSize: '2rem', color: '#667eea', marginBottom: '0.5rem' }}
+                />
+                <p style={{ margin: '0.5rem 0 0 0', color: '#667eea', fontWeight: '600' }}>
+                  Click to choose files or drag and drop
+                </p>
+                <input
+                  type="file"
+                  multiple
+                  accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleFileSelect}
+                  disabled={loading || attachments.length >= 5}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+
+            {/* Attachments List */}
+            {attachments.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <IonText>
+                  <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Selected Files:</p>
+                </IonText>
+                {attachments.map((att, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#f5f5f5',
+                      borderRadius: '6px',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    <div>
+                      <p style={{ margin: 0, fontWeight: '500', color: '#333' }}>
+                        {att.name}
+                      </p>
+                      <small style={{ color: '#888' }}>
+                        {(att.size / 1024 / 1024).toFixed(2)} MB
+                      </small>
+                    </div>
+                    <IonButton
+                      fill="clear"
+                      color="danger"
+                      onClick={() => removeAttachment(index)}
+                      disabled={loading}
+                    >
+                      <IonIcon slot="icon-only" icon={close} />
+                    </IonButton>
+                  </div>
+                ))}
+              </div>
+            )}
+          </IonCardContent>
+        </IonCard>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+          <IonButton
+            expand="block"
+            fill="clear"
+            onClick={() => history.goBack()}
+            disabled={loading}
+          >
+            Cancel
+          </IonButton>
+          <IonButton
+            expand="block"
+            color="primary"
+            onClick={handleCreateTicket}
+            disabled={loading || !title.trim() || !description.trim()}
+          >
+            {loading ? <IonSpinner name="dots" /> : 'Create Ticket'}
+          </IonButton>
+        </div>
+
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={3000}
+          color={toastColor}
+        />
+      </IonContent>
+    </IonPage>
+  );
+};
+
+export default CreateServiceTicket;

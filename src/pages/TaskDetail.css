@@ -1,6 +1,6 @@
 .task-detail-content {
   background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-  padding-bottom: 120px;
+  padding-bottom: 180px;
 }
 
 /* Header Card */
@@ -324,6 +324,7 @@ ion-text[color='medium'] p {
   border: 2px solid #ffc107;
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
   background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 213, 79, 0.05) 100%);
+  margin-bottom: 3rem;
 }
 
 .approval-card ion-card-header {
@@ -416,15 +417,19 @@ ion-text[color='medium'] p {
 .approval-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .approval-buttons ion-button {
   --padding-start: 1rem;
   --padding-end: 1rem;
   font-weight: 600;
-  height: 44px;
+  font-size: 1.05rem;
+  height: 50px;
+  border-radius: 8px;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Employee Proof Section - HR View */
@@ -474,7 +479,7 @@ ion-text[color='medium'] p {
 /* Responsive - Approval */
 @media (max-width: 640px) {
   .approval-card {
-    margin: 1.5rem auto;
+    margin: 1.5rem auto 3rem auto;
   }
 
   .completion-proof-display {
@@ -482,7 +487,14 @@ ion-text[color='medium'] p {
   }
 
   .approval-buttons {
-    gap: 0.5rem;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .approval-buttons ion-button {
+    height: 48px;
+    font-size: 1rem;
   }
 
   .employee-proof-section {

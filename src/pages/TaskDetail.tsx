@@ -153,6 +153,13 @@ const TaskDetail: React.FC = () => {
       const response = await taskService.uploadCompletionProof(id, proofFile);
       setTask(response.task);
       setProofFile(null);
+      
+      // Clear the file input element
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
       showSuccessMessage('Proof uploaded successfully');
     } catch (error: any) {
       showError(error.response?.data?.message || 'Failed to upload proof');
@@ -182,15 +189,10 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleApproveTask = async () => {
-    if (!approvalNotes.trim()) {
-      showError('Please add approval notes');
-      return;
-    }
-
     if (window.confirm('Approve this task completion?')) {
       try {
         setUpdating(true);
-        const response = await taskService.approveTaskCompletion(id, approvalNotes);
+        const response = await taskService.approveTaskCompletion(id, approvalNotes || 'Approved by HR Manager');
         setTask(response.task);
         showSuccessMessage('Task approved successfully');
         setApprovalNotes('');
@@ -434,7 +436,7 @@ const TaskDetail: React.FC = () => {
                 <strong className="proof-title">📸 Employee Completion Proof</strong>
                 <div className="proof-image-container">
                   <img 
-                    src={task.completionProofUrl} 
+                    src={`${task.completionProofUrl}?t=${new Date().getTime()}`}
                     alt="Task Completion Proof" 
                     className="proof-image"
                     onError={(e) => {
@@ -523,7 +525,7 @@ const TaskDetail: React.FC = () => {
                         <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f7ff', borderRadius: '8px', border: '1px solid #b3d9ff' }}>
                           <strong style={{ color: '#0066cc' }}>✓ Proof Uploaded:</strong>
                           <img 
-                            src={task.completionProofUrl} 
+                            src={`${task.completionProofUrl}?t=${new Date().getTime()}`}
                             alt="Proof" 
                             style={{ marginTop: '0.5rem', maxWidth: '100%', maxHeight: '150px', borderRadius: '6px', objectFit: 'cover' }}
                           />
@@ -640,7 +642,7 @@ const TaskDetail: React.FC = () => {
                     <strong>📸 Employee Submitted Proof:</strong>
                     {task.completionProofUrl ? (
                       <img 
-                        src={task.completionProofUrl} 
+                        src={`${task.completionProofUrl}?t=${new Date().getTime()}`}
                         alt="Task Proof" 
                         style={{ 
                           marginTop: '1rem', 
@@ -659,9 +661,9 @@ const TaskDetail: React.FC = () => {
 
                   <div style={{ marginTop: '1rem' }}>
                     <IonItem>
-                      <IonLabel position="stacked">Approval Notes/Feedback</IonLabel>
+                      <IonLabel position="stacked">Approval Notes/Feedback (Optional)</IonLabel>
                       <IonTextarea
-                        placeholder="Add your approval notes or rejection reason"
+                        placeholder="Add your approval notes or rejection reason (optional for approval, required for rejection)"
                         value={approvalNotes}
                         onIonChange={(e) => setApprovalNotes(e.detail.value!)}
                         rows={3}
@@ -675,7 +677,7 @@ const TaskDetail: React.FC = () => {
                       expand="block"
                       color="success"
                       onClick={handleApproveTask}
-                      disabled={updating || !approvalNotes.trim()}
+                      disabled={updating}
                     >
                       ✓ Approve Task
                     </IonButton>

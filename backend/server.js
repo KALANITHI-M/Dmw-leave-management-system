@@ -13,6 +13,7 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 import shiftRoutes from './routes/shiftRoutes.js';
 import attendanceRegularizationRoutes from './routes/attendanceRegularizationRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
+import serviceTicketRoutes from './routes/serviceTicketRoutes.js';
 import { startAbsentCronJob } from './utils/markAbsentJob.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,6 +37,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/attendance-regularization', attendanceRegularizationRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/service-tickets', serviceTicketRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'DMW CNC Solutions - Leave Management System API' });

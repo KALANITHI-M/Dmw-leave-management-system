@@ -1,0 +1,53 @@
+.create-ticket-content {
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+  padding-bottom: 120px;
+}
+
+.create-ticket-content ion-card {
+  border-top: 4px solid #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.create-ticket-content ion-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.create-ticket-content ion-card-title {
+  color: white;
+  font-weight: 700;
+}
+
+.create-ticket-content ion-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  margin-bottom: 1rem;
+}
+
+.create-ticket-content ion-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.create-ticket-content ion-input,
+.create-ticket-content ion-textarea,
+.create-ticket-content ion-select {
+  --padding-start: 0;
+  --padding-end: 0;
+  margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .create-ticket-content {
+    padding: 1rem;
+  }
+
+  .create-ticket-content ion-card {
+    margin-bottom: 1rem;
+  }
+}

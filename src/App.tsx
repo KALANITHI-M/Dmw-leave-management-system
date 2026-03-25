@@ -10,6 +10,9 @@ import TaskDetail from './pages/TaskDetail';
 import CreateTask from './pages/CreateTaskPage';
 import HRTaskManagement from './pages/HRTaskManagement';
 import MyTasks from './components/MyTasks';
+import ServiceTicketManagement from './pages/ServiceTicketManagement';
+import CreateServiceTicket from './pages/CreateServiceTicket';
+import ServiceTicketDetail from './pages/ServiceTicketDetail';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -114,6 +117,24 @@ const App: React.FC = () => (
               path="/hr/dashboard"
               component={HRDashboard}
               role="hr"
+            />
+            <PrivateRoute
+              exact
+              path="/service-tickets"
+              component={ServiceTicketManagement}
+              role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/create-service-ticket"
+              component={CreateServiceTicket}
+              role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/service-ticket/:id"
+              component={ServiceTicketDetail}
+              role="employee"
             />
             <Route exact path="/">
               <Redirect to="/login" />
