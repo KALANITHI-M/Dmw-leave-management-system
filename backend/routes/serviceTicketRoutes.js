@@ -23,11 +23,11 @@ router.use(protect);
 // Ticket creation (with file uploads)
 router.post('/', uploadFileMiddleware, createServiceTicket);
 
+// Get ticket statistics (specific route BEFORE generic routes)
+router.get('/statistics/dashboard', getTicketStatistics);
+
 // Get all tickets (with role-based filtering)
 router.get('/', getServiceTickets);
-
-// Get ticket statistics
-router.get('/statistics/dashboard', getTicketStatistics);
 
 // Get ticket by ID
 router.get('/:id', getServiceTicketById);

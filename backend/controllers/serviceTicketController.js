@@ -434,7 +434,7 @@ export const getTicketStatistics = async (req, res) => {
 
     let filters = {};
 
-    if (userRole === 'engineer') {
+    if (userRole === 'service engineer') {
       filters.assignedTo = userId;
     } else if (userRole === 'employee') {
       filters.createdBy = userId;
