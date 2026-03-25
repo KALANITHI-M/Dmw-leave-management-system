@@ -211,10 +211,10 @@ const ServiceTicketDetail: React.FC = () => {
     }
   };
 
-  const canAssignTicket = user?.role === 'admin' || user?.role === 'manager';
-  const canUpdateStatus = ticket?.assignedTo?._id === user?._id || user?.role === 'admin' || user?.role === 'manager';
+  const canAssignTicket = user && (user.role === 'admin' || user.role === 'manager');
+  const canUpdateStatus = (ticket?.assignedTo?._id === user?._id) || (user && (user.role === 'admin' || user.role === 'manager'));
   const canUploadProof = ticket?.assignedTo?._id === user?._id;
-  const canClose = user?.role === 'admin' || user?.role === 'manager';
+  const canClose = user && (user.role === 'admin' || user.role === 'manager');
 
   if (loading) {
     return (
