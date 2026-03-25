@@ -43,6 +43,7 @@ import ProfileSection from '../components/ProfileSection';
 import ProfileChangeRequests from '../components/ProfileChangeRequests';
 import ShiftManagement from '../components/ShiftManagement';
 import HRTaskManagement from './HRTaskManagement';
+import ServiceTicketManagement from './ServiceTicketManagement';
 import './HRDashboard.css';
 
 // Resolve proof URL: Cloudinary uploads are full URLs; old local paths need the backend host
@@ -63,7 +64,7 @@ const HRDashboard: React.FC = () => {
   const { logout } = useAuth();
   const history = useHistory();
   
-  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests' | 'balances' | 'attendance' | 'shifts' | 'tasks'>('overview');
+  const [activeSection, setActiveSection] = useState<'profile' | 'overview' | 'employees' | 'leaves' | 'requests' | 'balances' | 'attendance' | 'shifts' | 'tasks' | 'service-tickets'>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1038,6 +1039,9 @@ const HRDashboard: React.FC = () => {
 
       case 'tasks':
         return <HRTaskManagement embedded />;
+
+      case 'service-tickets':
+        return <ServiceTicketManagement />;
 
       default:
         return null;

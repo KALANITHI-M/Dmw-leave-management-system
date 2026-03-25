@@ -29,6 +29,7 @@ import {
   timeOutline,
   alertCircleOutline,
   clipboardOutline,
+  wrenchOutline,
 } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -230,6 +231,21 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                   <IonLabel>My Tasks</IonLabel>
                 </IonItem>
               </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Service Tickets</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'service-tickets' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('service-tickets')}
+                >
+                  <IonIcon icon={wrenchOutline} slot="start" />
+                  <IonLabel>My Service Tickets</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
             </>
           )}
 
@@ -325,6 +341,21 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                 >
                   <IonIcon icon={timeOutline} slot="start" />
                   <IonLabel>Shift Management</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Service Tickets</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'service-tickets' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('service-tickets')}
+                >
+                  <IonIcon icon={wrenchOutline} slot="start" />
+                  <IonLabel>Service Tickets</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             </>
