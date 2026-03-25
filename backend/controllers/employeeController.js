@@ -38,6 +38,11 @@ export const updateEmployee = async (req, res) => {
       employee.designation = req.body.designation || employee.designation;
       employee.phoneNumber = req.body.phoneNumber || employee.phoneNumber;
       employee.isActive = req.body.isActive !== undefined ? req.body.isActive : employee.isActive;
+      
+      // Allow HR to update role
+      if (req.body.role && ['employee', 'hr', 'service engineer'].includes(req.body.role)) {
+        employee.role = req.body.role;
+      }
 
       const updatedEmployee = await employee.save();
 
@@ -97,6 +102,59 @@ export const getEmployeeStats = async (req, res) => {
       activeEmployees,
       inactiveEmployees,
       departmentStats
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Create service engineer (HR only)
+export const createServiceEngineer = async (req, res) => {
+  try {
+    import('bcryptjs').then(async (bcryptModule) => {
+      const bcrypt = bcryptModule.default;
+      const { employeeId, name, email, password, department, designation, phoneNumber, joiningDate } = req.body;
+
+      // Validate required fields
+      if (!employeeId || !name || !email || !password || !department || !designation || !phoneNumber || !joiningDate) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      // Check if employee already exists
+      const existingEmployee = await Employee.findOne({ $or: [{ email }, { employeeId }] });
+      if (existingEmployee) {
+        return res.status(400).json({ message: 'Employee already exists with this email or employee ID' });
+      }
+
+      // Create service engineer
+      const serviceEngineer = await Employee.create({
+        employeeId,
+        name,
+        email,
+        password,
+        department,
+        designation,
+        phoneNumber,
+        joiningDate: new Date(joiningDate),
+        role: 'service engineer',
+        isActive: true,
+      });
+
+      res.status(201).json({
+        message: 'Service engineer created successfully',
+        employee: {
+          _id: serviceEngineer._id,
+          employeeId: serviceEngineer.employeeId,
+          name: serviceEngineer.name,
+          email: serviceEngineer.email,
+          department: serviceEngineer.department,
+          designation: serviceEngineer.designation,
+          phoneNumber: serviceEngineer.phoneNumber,
+          role: serviceEngineer.role,
+          isActive: serviceEngineer.isActive,
+        },
+      });
     });
   } catch (error) {
     console.error(error);

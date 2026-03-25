@@ -149,27 +149,39 @@ export const getServiceTickets = async (req, res) => {
     const userId = req.user._id;
     const userRole = req.user.role;
 
-    const filters = {};
+    let filters = {};
 
-    // Role-based filtering
+    // Build additional filter conditions
+    const additionalFilters = {};
+    if (status) additionalFilters.status = status;
+    if (priority) additionalFilters.priority = priority;
+    if (category) additionalFilters.category = category;
+
+    // Role-based filtering with proper $or handling
     if (userRole === 'service engineer') {
-      // Service engineers see only their assigned tickets
-      filters.assignedTo = userId;
+      filters = {
+        ...additionalFilters,
+        assignedTo: userId,
+      };
     } else if (userRole === 'employee') {
-      // Employees see only their created tickets and assigned tickets
-      filters.$or = [
-        { createdBy: userId },
-        { assignedTo: userId },
-      ];
-    }
-    // HR staff see all tickets
-
-    // Additional filters
-    if (status) filters.status = status;
-    if (priority) filters.priority = priority;
-    if (category) filters.category = category;
-    if (assignedTo && userRole === 'hr') {
-      filters.assignedTo = assignedTo;
+      // Combine $or with additional filters using $and
+      filters = {
+        $and: [
+          {
+            $or: [
+              { createdBy: userId },
+              { assignedTo: userId },
+            ],
+          },
+          additionalFilters,
+        ],
+      };
+    } else if (userRole === 'hr') {
+      // HR sees all tickets with applied filters
+      filters = additionalFilters;
+      if (assignedTo) {
+        filters.assignedTo = assignedTo;
+      }
     }
 
     const tickets = await ServiceTicket.find(filters)
@@ -434,11 +446,18 @@ export const getTicketStatistics = async (req, res) => {
 
     let filters = {};
 
+    // Build role-based filters for statistics
     if (userRole === 'service engineer') {
       filters.assignedTo = userId;
     } else if (userRole === 'employee') {
-      filters.createdBy = userId;
+      filters = {
+        $or: [
+          { createdBy: userId },
+          { assignedTo: userId },
+        ],
+      };
     }
+    // HR sees all tickets
 
     const statistics = {
       total: await ServiceTicket.countDocuments(filters),
