@@ -101,20 +101,30 @@ export const createServiceTicket = async (req, res) => {
       return res.status(400).json({ message: 'Priority level is required' });
     }
 
-    // Process file attachments
+    // Process file attachments (with error handling)
     const attachments = [];
     if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
-        const filename = `${Date.now()}-${file.originalname}`;
+      try {
+        for (const file of req.files) {
+          try {
+            const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
+            const filename = `${Date.now()}-${file.originalname}`;
 
-        const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
-        attachments.push({
-          filename: file.originalname,
-          url,
-          fileType: fileExt,
-          fileSize: file.size,
-        });
+            const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
+            attachments.push({
+              filename: file.originalname,
+              url,
+              fileType: fileExt,
+              fileSize: file.size,
+            });
+          } catch (fileError) {
+            console.error(`Error uploading file ${file.originalname}:`, fileError);
+            // Continue with other files even if one fails
+          }
+        }
+      } catch (uploadError) {
+        console.error('Error processing attachments:', uploadError);
+        // Continue even if attachment upload fails
       }
     }
 
@@ -130,12 +140,18 @@ export const createServiceTicket = async (req, res) => {
     });
 
     await ticket.save();
-    await ticket.populate(['createdBy', 'assignedTo']);
 
-    // Log activity
-    await logActivity(ticket._id, createdBy, 'created', `Ticket created: ${title}`);
+    // Populate after save
+    const populatedTicket = await ServiceTicket.findById(ticket._id)
+      .populate('createdBy', 'name email designation')
+      .populate('assignedTo', 'name email designation');
 
-    res.status(201).json({ message: 'Service ticket created successfully', ticket });
+    // Log activity (don't block if it fails)
+    logActivity(ticket._id, createdBy, 'created', `Ticket created: ${title}`).catch(err => {
+      console.error('Error logging activity:', err);
+    });
+
+    res.status(201).json({ message: 'Service ticket created successfully', ticket: populatedTicket });
   } catch (error) {
     console.error('Error creating ticket:', error);
     res.status(500).json({ message: 'Error creating ticket', error: error.message });
@@ -259,16 +275,20 @@ export const assignServiceTicket = async (req, res) => {
     }
 
     await ticket.save();
-    await ticket.populate(['createdBy', 'assignedTo']);
+    const populatedTicket = await ServiceTicket.findById(ticketId)
+      .populate('createdBy', 'name email designation')
+      .populate('assignedTo', 'name email designation');
 
-    // Log activity
+    // Log activity (don't block if it fails)
     const actionDetails = oldAssignee
       ? `Ticket reassigned from ${oldAssignee} to ${engineer.name}`
       : `Ticket assigned to ${engineer.name}`;
 
-    await logActivity(ticketId, req.user._id, oldAssignee ? 'reassigned' : 'assigned', actionDetails, oldAssignee, assignedTo);
+    logActivity(ticketId, req.user._id, oldAssignee ? 'reassigned' : 'assigned', actionDetails, oldAssignee, assignedTo).catch(err => {
+      console.error('Error logging activity:', err);
+    });
 
-    res.json({ message: 'Ticket assigned successfully', ticket });
+    res.json({ message: 'Ticket assigned successfully', ticket: populatedTicket });
   } catch (error) {
     console.error('Error assigning ticket:', error);
     res.status(500).json({ message: 'Error assigning ticket', error: error.message });
@@ -339,12 +359,17 @@ export const updateTicketStatus = async (req, res) => {
     }
 
     await ticket.save();
-    await ticket.populate(['createdBy', 'assignedTo', 'closedBy']);
+    const populatedTicket = await ServiceTicket.findById(ticketId)
+      .populate('createdBy', 'name email designation')
+      .populate('assignedTo', 'name email designation')
+      .populate('closedBy', 'name email');
 
-    // Log activity
-    await logActivity(ticketId, userId, 'status_changed', `Status changed from ${oldStatus} to ${newStatus}`, oldStatus, newStatus);
+    // Log activity (don't block if it fails)
+    logActivity(ticketId, userId, 'status_changed', `Status changed from ${oldStatus} to ${newStatus}`, oldStatus, newStatus).catch(err => {
+      console.error('Error logging activity:', err);
+    });
 
-    res.json({ message: `Ticket status updated to ${newStatus}`, ticket });
+    res.json({ message: `Ticket status updated to ${newStatus}`, ticket: populatedTicket });
   } catch (error) {
     console.error('Error updating ticket status:', error);
     res.status(500).json({ message: 'Error updating ticket status', error: error.message });
@@ -363,7 +388,7 @@ export const uploadProofOfWork = async (req, res) => {
     }
 
     // Permission check
-    if (ticket.assignedTo.toString() !== userId.toString() && req.user.role !== 'hr') {
+    if (ticket.assignedTo && ticket.assignedTo.toString() !== userId.toString() && req.user.role !== 'hr') {
       return res.status(403).json({ message: 'You are not authorized to upload proof for this ticket' });
     }
 
@@ -371,31 +396,48 @@ export const uploadProofOfWork = async (req, res) => {
       return res.status(400).json({ message: 'No files uploaded' });
     }
 
-    // Upload files
+    // Upload files with error handling
+    let successCount = 0;
     for (const file of req.files) {
-      const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
-      const filename = `proof-${Date.now()}-${file.originalname}`;
-      const { description } = req.body;
+      try {
+        const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
+        const filename = `proof-${Date.now()}-${file.originalname}`;
+        const { description } = req.body;
 
-      const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
+        const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
 
-      ticket.proofOfWork.push({
-        filename: file.originalname,
-        url,
-        fileType: fileExt,
-        fileSize: file.size,
-        uploadedBy: userId,
-        description: description || '',
-      });
+        ticket.proofOfWork.push({
+          filename: file.originalname,
+          url,
+          fileType: fileExt,
+          fileSize: file.size,
+          uploadedBy: userId,
+          description: description || '',
+        });
+
+        successCount++;
+      } catch (fileError) {
+        console.error(`Error uploading proof file ${file.originalname}:`, fileError);
+        // Continue with other files
+      }
+    }
+
+    if (successCount === 0) {
+      return res.status(500).json({ message: 'Failed to upload any proof files' });
     }
 
     await ticket.save();
-    await ticket.populate(['createdBy', 'assignedTo', 'proofOfWork.uploadedBy']);
+    const populatedTicket = await ServiceTicket.findById(ticketId)
+      .populate('createdBy', 'name email designation')
+      .populate('assignedTo', 'name email designation')
+      .populate('proofOfWork.uploadedBy', 'name email');
 
-    // Log activity
-    await logActivity(ticketId, userId, 'proof_uploaded', `Uploaded ${req.files.length} proof file(s)`);
+    // Log activity (don't block if it fails)
+    logActivity(ticketId, userId, 'proof_uploaded', `Uploaded ${successCount} proof file(s)`).catch(err => {
+      console.error('Error logging activity:', err);
+    });
 
-    res.json({ message: 'Proof of work uploaded successfully', ticket });
+    res.json({ message: `Proof of work uploaded successfully (${successCount}/${req.files.length} files)`, ticket: populatedTicket });
   } catch (error) {
     console.error('Error uploading proof:', error);
     res.status(500).json({ message: 'Error uploading proof', error: error.message });
@@ -428,8 +470,10 @@ export const addTicketComment = async (req, res) => {
     await comment.save();
     await comment.populate('createdBy', 'name email designation');
 
-    // Log activity
-    await logActivity(ticketId, userId, 'comment_added', `Comment added to ticket`);
+    // Log activity (don't block if it fails)
+    logActivity(ticketId, userId, 'comment_added', `Comment added to ticket`).catch(err => {
+      console.error('Error logging activity:', err);
+    });
 
     res.json({ message: 'Comment added successfully', comment });
   } catch (error) {
@@ -501,12 +545,16 @@ export const rejectResolution = async (req, res) => {
     ticket.resolutionNotes = null;
 
     await ticket.save();
-    await ticket.populate(['createdBy', 'assignedTo']);
+    const populatedTicket = await ServiceTicket.findById(ticketId)
+      .populate('createdBy', 'name email designation')
+      .populate('assignedTo', 'name email designation');
 
-    // Log activity
-    await logActivity(ticketId, req.user._id, 'resolution_rejected', `Resolution rejected: ${rejectionReason || 'No reason provided'}`);
+    // Log activity (don't block if it fails)
+    logActivity(ticketId, req.user._id, 'resolution_rejected', `Resolution rejected: ${rejectionReason || 'No reason provided'}`).catch(err => {
+      console.error('Error logging activity:', err);
+    });
 
-    res.json({ message: 'Resolution rejected successfully', ticket });
+    res.json({ message: 'Resolution rejected successfully', ticket: populatedTicket });
   } catch (error) {
     console.error('Error rejecting resolution:', error);
     res.status(500).json({ message: 'Error rejecting resolution', error: error.message });
