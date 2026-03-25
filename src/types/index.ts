@@ -7,7 +7,7 @@ export interface User {
   designation: string;
   phoneNumber?: string;
   joiningDate?: string;
-  role: 'employee' | 'hr' | 'admin' | 'manager' | 'engineer';
+  role: 'employee' | 'hr' | 'service engineer';
   token: string;
 }
 
@@ -36,7 +36,7 @@ export interface AuthResponse {
   department: string;
   designation: string;
   phoneNumber?: string;
-  role: 'employee' | 'hr' | 'admin' | 'manager' | 'engineer';
+  role: 'employee' | 'hr' | 'service engineer';
   token: string;
 }
 

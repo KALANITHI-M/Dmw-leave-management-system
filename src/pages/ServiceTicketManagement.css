@@ -64,7 +64,7 @@
   margin-bottom: 1.5rem;
 }
 
-ion-select {
+.service-ticket-content ion-select {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 8px;

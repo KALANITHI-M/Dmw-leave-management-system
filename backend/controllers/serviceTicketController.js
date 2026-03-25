@@ -152,8 +152,8 @@ export const getServiceTickets = async (req, res) => {
     const filters = {};
 
     // Role-based filtering
-    if (userRole === 'engineer') {
-      // Engineers see only their tickets
+    if (userRole === 'service engineer') {
+      // Service engineers see only their assigned tickets
       filters.assignedTo = userId;
     } else if (userRole === 'employee') {
       // Employees see only their created tickets and assigned tickets
@@ -162,13 +162,13 @@ export const getServiceTickets = async (req, res) => {
         { assignedTo: userId },
       ];
     }
-    // Admins and managers see all tickets
+    // HR staff see all tickets
 
     // Additional filters
     if (status) filters.status = status;
     if (priority) filters.priority = priority;
     if (category) filters.category = category;
-    if (assignedTo && (userRole === 'admin' || userRole === 'manager')) {
+    if (assignedTo && userRole === 'hr') {
       filters.assignedTo = assignedTo;
     }
 
@@ -216,15 +216,15 @@ export const getServiceTicketById = async (req, res) => {
   }
 };
 
-// Assign ticket (Admin/Manager only)
+// Assign ticket (HR only)
 export const assignServiceTicket = async (req, res) => {
   try {
     const { assignedTo } = req.body;
     const ticketId = req.params.id;
 
     // Validate permissions
-    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Only admins and managers can assign tickets' });
+    if (req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR staff can assign tickets' });
     }
 
     const ticket = await ServiceTicket.findById(ticketId);
@@ -232,10 +232,10 @@ export const assignServiceTicket = async (req, res) => {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    // Validate assigned engineer exists
+    // Validate assigned service engineer exists
     const engineer = await Employee.findById(assignedTo);
-    if (!engineer || engineer.role !== 'engineer') {
-      return res.status(400).json({ message: 'Invalid engineer selected' });
+    if (!engineer || engineer.role !== 'service engineer') {
+      return res.status(400).json({ message: 'Invalid service engineer selected' });
     }
 
     const oldAssignee = ticket.assignedTo;
@@ -276,13 +276,13 @@ export const updateTicketStatus = async (req, res) => {
     }
 
     // Permission checks
-    if (ticket.assignedTo && ticket.assignedTo.toString() !== userId.toString() && req.user.role === 'engineer') {
+    if (ticket.assignedTo && ticket.assignedTo.toString() !== userId.toString() && req.user.role === 'service engineer') {
       return res.status(403).json({ message: 'You are not assigned to this ticket' });
     }
 
-    // Only admins/managers can close tickets
-    if (newStatus === 'Closed' && req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Only admins/managers can close tickets' });
+    // Only HR staff can close tickets
+    if (newStatus === 'Closed' && req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR staff can close tickets' });
     }
 
     // Validate status transition
@@ -351,7 +351,7 @@ export const uploadProofOfWork = async (req, res) => {
     }
 
     // Permission check
-    if (ticket.assignedTo.toString() !== userId.toString() && req.user.role !== 'admin' && req.user.role !== 'manager') {
+    if (ticket.assignedTo.toString() !== userId.toString() && req.user.role !== 'hr') {
       return res.status(403).json({ message: 'You are not authorized to upload proof for this ticket' });
     }
 
@@ -401,9 +401,9 @@ export const addTicketComment = async (req, res) => {
       return res.status(400).json({ message: 'Comment cannot be empty' });
     }
 
-    // Internal comments restricted to admin/manager
-    if (isInternal && req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Only admins/managers can add internal comments' });
+    // Internal comments restricted to HR staff
+    if (isInternal && req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR staff can add internal comments' });
     }
 
     const comment = new ServiceTicketComment({
@@ -458,14 +458,14 @@ export const getTicketStatistics = async (req, res) => {
   }
 };
 
-// Reject resolution (Admin/Manager only)
+// Reject resolution (HR only)
 export const rejectResolution = async (req, res) => {
   try {
     const { rejectionReason } = req.body;
     const ticketId = req.params.id;
 
-    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Only admins/managers can reject resolutions' });
+    if (req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR staff can reject resolutions' });
     }
 
     const ticket = await ServiceTicket.findById(ticketId);
@@ -506,7 +506,7 @@ export const deleteTicketComment = async (req, res) => {
     }
 
     // Permission check
-    if (comment.createdBy.toString() !== userId.toString() && req.user.role !== 'admin' && req.user.role !== 'manager') {
+    if (comment.createdBy.toString() !== userId.toString() && req.user.role !== 'hr') {
       return res.status(403).json({ message: 'You cannot delete this comment' });
     }
 

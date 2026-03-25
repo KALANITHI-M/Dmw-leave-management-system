@@ -211,10 +211,10 @@ const ServiceTicketDetail: React.FC = () => {
     }
   };
 
-  const canAssignTicket = user && (user.role === 'admin' || user.role === 'manager');
-  const canUpdateStatus = (ticket?.assignedTo?._id === user?._id) || (user && (user.role === 'admin' || user.role === 'manager'));
+  const canAssignTicket = user && user.role === 'hr';
+  const canUpdateStatus = (ticket?.assignedTo?._id === user?._id) || (user && user.role === 'hr');
   const canUploadProof = ticket?.assignedTo?._id === user?._id;
-  const canClose = user && (user.role === 'admin' || user.role === 'manager');
+  const canClose = user && user.role === 'hr';
 
   if (loading) {
     return (
@@ -506,7 +506,7 @@ const ServiceTicketDetail: React.FC = () => {
                   />
                 </IonItem>
 
-                {(user?.role === 'admin' || user?.role === 'manager') && (
+                {user?.role === 'hr' && (
                   <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center' }}>
                     <input
                       type="checkbox"
@@ -516,7 +516,7 @@ const ServiceTicketDetail: React.FC = () => {
                       disabled={updating}
                     />
                     <label htmlFor="internal" style={{ marginLeft: '0.5rem', cursor: 'pointer' }}>
-                      Internal Comment (Only visible to admins/managers)
+                      Internal Comment (Only visible to HR)
                     </label>
                   </div>
                 )}
