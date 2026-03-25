@@ -427,6 +427,50 @@ ion-text[color='medium'] p {
   height: 44px;
 }
 
+/* Employee Proof Section - HR View */
+.employee-proof-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+  border-radius: 12px;
+  border: 2px solid #0099cc;
+  box-shadow: 0 2px 8px rgba(0, 153, 204, 0.1);
+}
+
+.proof-title {
+  display: block;
+  margin-bottom: 1rem;
+  color: #0066cc;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.proof-image-container {
+  text-align: center;
+  overflow: auto;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.proof-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.proof-submission-date {
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  margin: 0;
+}
+
 /* Responsive - Approval */
 @media (max-width: 640px) {
   .approval-card {
@@ -439,5 +483,17 @@ ion-text[color='medium'] p {
 
   .approval-buttons {
     gap: 0.5rem;
+  }
+
+  .employee-proof-section {
+    margin: 1rem -1rem 1rem -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 1rem;
+  }
+
+  .proof-image {
+    max-height: 300px;
   }
 }

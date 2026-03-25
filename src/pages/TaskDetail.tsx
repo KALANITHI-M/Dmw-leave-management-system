@@ -427,6 +427,28 @@ const TaskDetail: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* Employee Proof Section - Visible to HR for completed tasks */}
+            {user?.role === 'hr' && task.status === 'Completed' && task.completionProofUrl && (
+              <div className="employee-proof-section">
+                <strong className="proof-title">📸 Employee Completion Proof</strong>
+                <div className="proof-image-container">
+                  <img 
+                    src={task.completionProofUrl} 
+                    alt="Task Completion Proof" 
+                    className="proof-image"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+                {task.submissionDate && (
+                  <p className="proof-submission-date">
+                    Submitted on: {new Date(task.submissionDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            )}
           </IonCardContent>
         </IonCard>
 

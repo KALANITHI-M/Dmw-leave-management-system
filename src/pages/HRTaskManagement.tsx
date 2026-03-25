@@ -23,7 +23,7 @@ import {
   IonFab,
   IonFabButton,
 } from '@ionic/react';
-import { add, trash, pencil, analytics, arrowBack } from 'ionicons/icons';
+import { add, trash, pencil, analytics, arrowBack, checkmarkDone } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { taskService } from '../api/taskService';
 import './HRTaskManagement.css';
@@ -39,6 +39,7 @@ interface Task {
   createdBy: { name: string };
   assignedTo: Array<{ name: string }>;
   approvalStatus?: string;
+  completionProofUrl?: string;
 }
 
 interface ReportData {
@@ -68,6 +69,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [selectedApprovalStatus, setSelectedApprovalStatus] = useState('all');
+  const [showPendingApprovalsOnly, setShowPendingApprovalsOnly] = useState(false);
 
   useEffect(() => {
     fetchAllTasks();
@@ -112,16 +114,20 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
   const applyFilters = () => {
     let filtered = allTasks;
 
-    if (selectedStatus !== 'all') {
-      filtered = filtered.filter((t) => t.status === selectedStatus);
-    }
+    if (showPendingApprovalsOnly) {
+      filtered = filtered.filter((t) => (t.approvalStatus || 'Not Submitted') === 'Pending Approval');
+    } else {
+      if (selectedStatus !== 'all') {
+        filtered = filtered.filter((t) => t.status === selectedStatus);
+      }
 
-    if (selectedPriority !== 'all') {
-      filtered = filtered.filter((t) => t.priority === selectedPriority);
-    }
+      if (selectedPriority !== 'all') {
+        filtered = filtered.filter((t) => t.priority === selectedPriority);
+      }
 
-    if (selectedApprovalStatus !== 'all') {
-      filtered = filtered.filter((t) => (t.approvalStatus || 'Not Submitted') === selectedApprovalStatus);
+      if (selectedApprovalStatus !== 'all') {
+        filtered = filtered.filter((t) => (t.approvalStatus || 'Not Submitted') === selectedApprovalStatus);
+      }
     }
 
     if (searchText) {
@@ -135,7 +141,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
 
   useEffect(() => {
     applyFilters();
-  }, [selectedStatus, selectedPriority, selectedApprovalStatus, searchText, allTasks]);
+  }, [selectedStatus, selectedPriority, selectedApprovalStatus, searchText, allTasks, showPendingApprovalsOnly]);
 
   const showError = (message: string) => {
     setToastMessage(message);
@@ -392,6 +398,66 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
                 </div>
               </div>
 
+              {/* Proof Preview - Show for pending approvals */}
+              {task.approvalStatus === 'Pending Approval' && task.completionProofUrl && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#fff3cd',
+                  borderRadius: '8px',
+                  border: '2px dashed #ffc107',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>📸</span>
+                    <strong style={{ color: '#856404' }}>Proof Pending Review</strong>
+                  </div>
+                  <img 
+                    src={task.completionProofUrl} 
+                    alt="Task Proof" 
+                    style={{
+                      width: '100%',
+                      maxHeight: '150px',
+                      borderRadius: '6px',
+                      objectFit: 'cover',
+                      border: '1px solid #ffc107',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => history.push(`/task/${task._id}`)}
+                  />
+                  <small style={{ display: 'block', marginTop: '0.5rem', color: '#856404' }}>
+                    Click to review full details and approve/reject
+                  </small>
+                </div>
+              )}
+
+              {/* Approved Proof - Show as success */}
+              {task.approvalStatus === 'Approved' && task.completionProofUrl && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#d4edda',
+                  borderRadius: '8px',
+                  border: '2px solid #28a745',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>✅</span>
+                    <strong style={{ color: '#155724' }}>Approved</strong>
+                  </div>
+                  <img 
+                    src={task.completionProofUrl} 
+                    alt="Approved Proof" 
+                    style={{
+                      width: '100%',
+                      maxHeight: '120px',
+                      borderRadius: '6px',
+                      objectFit: 'cover',
+                      border: '1px solid #28a745',
+                      opacity: 0.8,
+                    }}
+                  />
+                </div>
+              )}
+
               <div className="task-actions">
                 <IonButton
                   size="small"
@@ -436,6 +502,20 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
     return (
       <div className="ion-padding task-management-content">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px', gap: '8px' }}>
+          <IonButton 
+            onClick={() => {
+              setShowPendingApprovalsOnly(!showPendingApprovalsOnly);
+              if (showPendingApprovalsOnly) {
+                setSelectedStatus('all');
+                setSelectedPriority('all');
+                setSelectedApprovalStatus('all');
+              }
+            }} 
+            className={showPendingApprovalsOnly ? 'pending-approval-btn active' : 'pending-approval-btn'}
+          >
+            <IonIcon slot="start" icon={checkmarkDone} />
+            Pending Approvals
+          </IonButton>
           <IonButton onClick={() => history.push('/create-task')} color="primary">
             <IonIcon slot="start" icon={add} />
             Create Task
@@ -460,6 +540,20 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
           </IonButtons>
           <IonTitle>Task Management</IonTitle>
           <IonButtons slot="end">
+            <IonButton 
+              onClick={() => {
+                setShowPendingApprovalsOnly(!showPendingApprovalsOnly);
+                if (showPendingApprovalsOnly) {
+                  setSelectedStatus('all');
+                  setSelectedPriority('all');
+                  setSelectedApprovalStatus('all');
+                }
+              }} 
+              className={showPendingApprovalsOnly ? 'pending-approval-btn active' : 'pending-approval-btn'}
+            >
+              <IonIcon slot="start" icon={checkmarkDone} />
+              Pending Approvals
+            </IonButton>
             <IonButton onClick={() => history.push('/create-task')} color="primary">
               <IonIcon slot="start" icon={add} />
               Create Task

@@ -300,6 +300,26 @@ ion-fab-button:hover {
   --box-shadow: 0 6px 16px rgba(255, 102, 0, 0.5);
 }
 
+/* Pending Approvals Button */
+.pending-approval-btn {
+  --color: #ff9800;
+  font-weight: 600;
+  text-transform: none;
+  --border-radius: 8px;
+  border: 2px solid #ff9800;
+  transition: all 0.3s ease;
+}
+
+.pending-approval-btn.active {
+  --background: #ff9800;
+  --color: white;
+  --box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.pending-approval-btn:hover:not(.active) {
+  --background: rgba(255, 152, 0, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .filter-row {
