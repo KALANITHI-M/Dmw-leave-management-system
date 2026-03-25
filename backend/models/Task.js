@@ -34,6 +34,35 @@ const taskSchema = new mongoose.Schema(
       enum: ['Pending', 'In Progress', 'Completed', 'Overdue'],
       default: 'Pending',
     },
+    // HR approval workflow fields
+    approvalStatus: {
+      type: String,
+      enum: ['Not Submitted', 'Pending Approval', 'Approved', 'Rejected'],
+      default: 'Not Submitted',
+    },
+    submissionDate: {
+      type: Date,
+      default: null,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Employee',
+      default: null,
+    },
+    approvalDate: {
+      type: Date,
+      default: null,
+    },
+    approvalNotes: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    // File URL for completion proof (photo/screenshot only)
+    completionProofUrl: {
+      type: String,
+      default: null,
+    },
     startDate: {
       type: Date,
       required: [true, 'Start date is required'],

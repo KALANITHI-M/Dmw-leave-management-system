@@ -6,11 +6,16 @@ import {
   getTaskById,
   updateTask,
   updateTaskProgress,
+  submitTaskForApproval,
+  approveTaskCompletion,
+  rejectTaskCompletion,
   deleteTask,
   addComment,
   getTaskComments,
   deleteComment,
   getTaskReports,
+  uploadCompletionProof,
+  uploadProofMiddleware,
 } from '../controllers/taskController.js';
 import { protect, hrOnly } from '../middleware/auth.js';
 
@@ -27,6 +32,14 @@ router.delete('/:id', protect, hrOnly, deleteTask); // Delete task (HR only)
 
 // Task progress update (employees can update their own task progress)
 router.put('/:id/progress', protect, updateTaskProgress);
+
+// Task approval workflow
+router.post('/:id/submit-for-approval', protect, submitTaskForApproval); // Employee submits completed task for approval
+router.post('/:id/approve', protect, hrOnly, approveTaskCompletion); // HR approves task completion
+router.post('/:id/reject', protect, hrOnly, rejectTaskCompletion); // HR rejects task completion with feedback
+
+// Upload completion proof (photo/screenshot only)
+router.post('/:id/upload-proof', protect, uploadProofMiddleware, uploadCompletionProof);
 
 // Task comments
 router.post('/:id/comments', protect, addComment); // Add comment to task

@@ -38,6 +38,7 @@ interface Task {
   dueDate: string;
   createdBy: { name: string };
   assignedTo: Array<{ name: string }>;
+  approvalStatus?: string;
 }
 
 interface ReportData {
@@ -66,6 +67,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
   const [searchText, setSearchText] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
+  const [selectedApprovalStatus, setSelectedApprovalStatus] = useState('all');
 
   useEffect(() => {
     fetchAllTasks();
@@ -118,6 +120,10 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
       filtered = filtered.filter((t) => t.priority === selectedPriority);
     }
 
+    if (selectedApprovalStatus !== 'all') {
+      filtered = filtered.filter((t) => (t.approvalStatus || 'Not Submitted') === selectedApprovalStatus);
+    }
+
     if (searchText) {
       filtered = filtered.filter((t) =>
         t.title.toLowerCase().includes(searchText.toLowerCase())
@@ -129,7 +135,7 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
 
   useEffect(() => {
     applyFilters();
-  }, [selectedStatus, selectedPriority, searchText, allTasks]);
+  }, [selectedStatus, selectedPriority, selectedApprovalStatus, searchText, allTasks]);
 
   const showError = (message: string) => {
     setToastMessage(message);
@@ -164,6 +170,19 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
         return 'warning';
       case 'Medium':
         return 'primary';
+      default:
+        return 'medium';
+    }
+  };
+
+  const getApprovalStatusColor = (approvalStatus: string | undefined) => {
+    switch (approvalStatus) {
+      case 'Approved':
+        return 'success';
+      case 'Pending Approval':
+        return 'warning';
+      case 'Rejected':
+        return 'danger';
       default:
         return 'medium';
     }
@@ -297,6 +316,18 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
           <IonSelectOption value="High">High</IonSelectOption>
           <IonSelectOption value="Critical">Critical</IonSelectOption>
         </IonSelect>
+
+        <IonSelect
+          value={selectedApprovalStatus}
+          onIonChange={(e) => setSelectedApprovalStatus(e.detail.value)}
+          placeholder="Filter by Approval Status"
+        >
+          <IonSelectOption value="all">All Approvals</IonSelectOption>
+          <IonSelectOption value="Not Submitted">Not Submitted</IonSelectOption>
+          <IonSelectOption value="Pending Approval">Pending Approval</IonSelectOption>
+          <IonSelectOption value="Approved">Approved</IonSelectOption>
+          <IonSelectOption value="Rejected">Rejected</IonSelectOption>
+        </IonSelect>
       </div>
 
       {/* Tasks List */}
@@ -323,9 +354,14 @@ const HRTaskManagement: React.FC<HRTaskManagementProps> = ({ embedded = false })
                   <h2>{task.title}</h2>
                   <p className="task-description">{task.description}</p>
                 </div>
-                <div className="task-badges">
+              <div className="task-badges">
                   <IonBadge color={getStatusColor(task.status)}>{task.status}</IonBadge>
                   <IonBadge color={getPriorityColor(task.priority)}>{task.priority}</IonBadge>
+                  {task.approvalStatus && (
+                    <IonBadge color={getApprovalStatusColor(task.approvalStatus)}>
+                      {task.approvalStatus}
+                    </IonBadge>
+                  )}
                 </div>
               </div>
 

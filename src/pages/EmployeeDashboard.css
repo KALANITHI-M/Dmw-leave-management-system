@@ -1,5 +1,6 @@
 .employee-dashboard-content {
   --background: #f5f5f5;
+  padding-bottom: 120px !important;
 }
 
 .dashboard-content {

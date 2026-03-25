@@ -63,10 +63,43 @@ export const taskService = {
   },
 
   // Update task progress (Employee can update their own task progress)
-  updateTaskProgress: async (taskId: string, progress: number, status: string) => {
+  updateTaskProgress: async (taskId: string, progress: number) => {
     const response = await axiosInstance.put(`${TASKS_API}/${taskId}/progress`, {
       progress,
-      status,
+    });
+    return response.data;
+  },
+
+  // Upload completion proof (photo/screenshot)
+  uploadCompletionProof: async (taskId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('proof', file);
+    const response = await axiosInstance.post(`${TASKS_API}/${taskId}/upload-proof`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Submit task for HR approval (Employee - when 100% complete)
+  submitTaskForApproval: async (taskId: string) => {
+    const response = await axiosInstance.post(`${TASKS_API}/${taskId}/submit-for-approval`, {});
+    return response.data;
+  },
+
+  // Approve task completion (HR only)
+  approveTaskCompletion: async (taskId: string, approvalNotes: string) => {
+    const response = await axiosInstance.post(`${TASKS_API}/${taskId}/approve`, {
+      approvalNotes,
+    });
+    return response.data;
+  },
+
+  // Reject task completion (HR only)
+  rejectTaskCompletion: async (taskId: string, approvalNotes: string) => {
+    const response = await axiosInstance.post(`${TASKS_API}/${taskId}/reject`, {
+      approvalNotes,
     });
     return response.data;
   },

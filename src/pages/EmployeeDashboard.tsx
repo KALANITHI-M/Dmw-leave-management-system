@@ -205,11 +205,7 @@ const EmployeeDashboard: React.FC = () => {
         return <AttendanceRegularization />;
 
       case 'my-tasks':
-        return (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <MyTasks embedded />
-          </div>
-        );
+        return <MyTasks embedded />;
 
       default:
         return <LeaveApplicationForm onSuccess={handleLeaveSubmitSuccess} />;
@@ -237,7 +233,7 @@ const EmployeeDashboard: React.FC = () => {
         
         <IonContent 
           className="employee-dashboard-content" 
-          scrollY={activeSection !== 'my-tasks'}
+          scrollY={true}
         >
           {renderContent()}
 

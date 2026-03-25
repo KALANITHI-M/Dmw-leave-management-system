@@ -2,6 +2,75 @@ import Task from '../models/Task.js';
 import TaskComment from '../models/TaskComment.js';
 import Employee from '../models/Employee.js';
 import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
+import path from 'path';
+
+// Store file in memory, then stream to Cloudinary
+const memStorage = multer.memoryStorage();
+
+const proofFileFilter = (req, file, cb) => {
+  // Only allow image files for task proofs
+  const allowed = /jpeg|jpg|png/;
+  if (allowed.test(path.extname(file.originalname).toLowerCase())) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPG and PNG image files are allowed for proof'));
+  }
+};
+
+export const uploadProofMiddleware = multer({ 
+  storage: memStorage, 
+  fileFilter: proofFileFilter, 
+  limits: { fileSize: 5 * 1024 * 1024 } 
+}).single('proof');
+
+// Upload buffer to Cloudinary and return secure URL
+const uploadToCloudinary = (buffer, mimetype) =>
+  new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'task-proofs',
+        resource_type: 'image',
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+
+// Upload task completion proof (Employee)
+export const uploadCompletionProof = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    // Check if employee is assigned to this task
+    const isAssigned = task.assignedTo.some((id) => id.toString() === req.user._id.toString());
+    if (!isAssigned) {
+      return res.status(403).json({ message: 'You are not assigned to this task' });
+    }
+
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    // Validate file is an image
+    if (!req.file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ message: 'Only image files (photos/screenshots) are accepted' });
+    }
+
+    const secureUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+    task.completionProofUrl = secureUrl;
+    await task.save();
+    await task.populate(['assignedTo', 'createdBy', 'approvedBy']);
+
+    res.json({ message: 'Proof uploaded successfully', task });
+  } catch (error) {
+    console.error('Proof upload error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Create a new task (Manager/Admin only)
 export const createTask = async (req, res) => {
@@ -179,7 +248,7 @@ export const updateTask = async (req, res) => {
 // Update task progress (Employee)
 export const updateTaskProgress = async (req, res) => {
   try {
-    const { progress, status } = req.body;
+    const { progress } = req.body;
     const employeeId = req.user._id;
 
     const task = await Task.findById(req.params.id);
@@ -198,19 +267,126 @@ export const updateTaskProgress = async (req, res) => {
       task.progress = Math.min(100, Math.max(0, progress));
     }
 
-    if (status) {
-      task.status = status;
-      if (status === 'Completed') {
-        task.completedDate = new Date();
-      }
-    }
-
     await task.save();
-    await task.populate(['assignedTo', 'createdBy']);
+    await task.populate(['assignedTo', 'createdBy', 'approvedBy']);
 
     res.json({ message: 'Task progress updated', task });
   } catch (error) {
     res.status(500).json({ message: 'Error updating task progress', error: error.message });
+  }
+};
+
+// Submit task for HR approval (Employee - when they mark 100% complete)
+export const submitTaskForApproval = async (req, res) => {
+  try {
+    const employeeId = req.user._id;
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Check if employee is assigned to this task
+    const isAssigned = task.assignedTo.some((id) => id.toString() === employeeId.toString());
+    if (!isAssigned) {
+      return res.status(403).json({ message: 'You are not assigned to this task' });
+    }
+
+    if (task.progress !== 100) {
+      return res.status(400).json({ message: 'Task progress must be 100% to submit for approval' });
+    }
+
+    if (!task.completionProofUrl) {
+      return res.status(400).json({ message: 'Please upload completion proof (photo/screenshot) before submitting' });
+    }
+
+    task.status = 'Completed';
+    task.approvalStatus = 'Pending Approval';
+    task.submissionDate = new Date();
+
+    await task.save();
+    await task.populate(['assignedTo', 'createdBy', 'approvedBy']);
+
+    res.json({ message: 'Task submitted for HR approval', task });
+  } catch (error) {
+    res.status(500).json({ message: 'Error submitting task for approval', error: error.message });
+  }
+};
+
+// Approve task completion (HR only)
+export const approveTaskCompletion = async (req, res) => {
+  try {
+    const { approvalNotes } = req.body;
+    const hrId = req.user._id;
+
+    // Verify user is HR
+    if (req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR can approve tasks' });
+    }
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    if (task.approvalStatus !== 'Pending Approval') {
+      return res.status(400).json({ message: 'Task is not pending approval' });
+    }
+
+    task.approvalStatus = 'Approved';
+    task.approvedBy = hrId;
+    task.approvalDate = new Date();
+    task.approvalNotes = approvalNotes || 'Approved by HR';
+
+    await task.save();
+    await task.populate(['assignedTo', 'createdBy', 'approvedBy']);
+
+    res.json({ message: 'Task approved successfully', task });
+  } catch (error) {
+    res.status(500).json({ message: 'Error approving task', error: error.message });
+  }
+};
+
+// Reject task completion (HR only)
+export const rejectTaskCompletion = async (req, res) => {
+  try {
+    const { approvalNotes } = req.body;
+    const hrId = req.user._id;
+
+    // Verify user is HR
+    if (req.user.role !== 'hr') {
+      return res.status(403).json({ message: 'Only HR can reject tasks' });
+    }
+
+    if (!approvalNotes || !approvalNotes.trim()) {
+      return res.status(400).json({ message: 'Rejection reason is required' });
+    }
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    if (task.approvalStatus !== 'Pending Approval') {
+      return res.status(400).json({ message: 'Task is not pending approval' });
+    }
+
+    // Send task back to 'In Progress' so employee can fix and resubmit
+    task.approvalStatus = 'Rejected';
+    task.status = 'In Progress';
+    task.approvedBy = hrId;
+    task.approvalDate = new Date();
+    task.approvalNotes = approvalNotes;
+
+    await task.save();
+    await task.populate(['assignedTo', 'createdBy', 'approvedBy']);
+
+    res.json({ message: 'Task rejected with feedback for employee', task });
+  } catch (error) {
+    res.status(500).json({ message: 'Error rejecting task', error: error.message });
   }
 };
 

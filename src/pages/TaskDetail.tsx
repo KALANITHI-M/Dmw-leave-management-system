@@ -42,6 +42,12 @@ interface Task {
   createdBy: { _id: string; name: string };
   assignedTo: Array<{ _id: string; name: string }>;
   completedDate?: string;
+  approvalStatus?: string;
+  submissionDate?: string;
+  approvedBy?: { _id: string; name: string };
+  approvalDate?: string;
+  approvalNotes?: string;
+  completionProofUrl?: string;
 }
 
 interface Comment {
@@ -67,23 +73,30 @@ const TaskDetail: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [newProgress, setNewProgress] = useState(0);
   const [newStatus, setNewStatus] = useState('');
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [approvalNotes, setApprovalNotes] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  // Handle back navigation reliably across direct URL loads
-  const handleBackClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (history.length > 2) {
-      history.goBack();
-    } else {
-      if (user?.role === 'hr') {
-        history.push('/hr/dashboard');
-      } else {
-        history.push('/employee/dashboard');
-      }
-    }
+  // Determine the dashboard route based on user role
+  const dashboardRoute = user?.role === 'hr' ? '/hr/dashboard' : '/employee/dashboard';
+
+  // Handle back navigation reliably
+  const handleBackClick = () => {
+    // Use replace to replace the current route in history stack, ensuring proper navigation
+    history.replace(dashboardRoute);
   };
 
   useEffect(() => {
+    // Reset state when ID changes
+    setTask(null);
+    setComments([]);
+    setActiveTab('details');
+    setNewComment('');
+    setNewProgress(0);
+    setNewStatus('');
+    setProofFile(null);
+    setApprovalNotes('');
+    
     fetchTask();
   }, [id]);
 
@@ -119,13 +132,94 @@ const TaskDetail: React.FC = () => {
   const handleUpdateProgress = async () => {
     try {
       setUpdating(true);
-      const response = await taskService.updateTaskProgress(id, newProgress, newStatus);
+      const response = await taskService.updateTaskProgress(id, newProgress);
       setTask(response.task);
-      showSuccessMessage('Task updated successfully');
+      showSuccessMessage('Task progress updated successfully');
     } catch (error: any) {
       showError(error.response?.data?.message || 'Failed to update task');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleUploadProof = async () => {
+    if (!proofFile) {
+      showError('Please select a photo or screenshot');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      const response = await taskService.uploadCompletionProof(id, proofFile);
+      setTask(response.task);
+      setProofFile(null);
+      showSuccessMessage('Proof uploaded successfully');
+    } catch (error: any) {
+      showError(error.response?.data?.message || 'Failed to upload proof');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleSubmitForApproval = async () => {
+    if (!task?.completionProofUrl) {
+      showError('Please upload a proof photo/screenshot before submitting');
+      return;
+    }
+
+    if (window.confirm('Submit this task for HR approval?')) {
+      try {
+        setUpdating(true);
+        const response = await taskService.submitTaskForApproval(id);
+        setTask(response.task);
+        showSuccessMessage('Task submitted for HR approval');
+      } catch (error: any) {
+        showError(error.response?.data?.message || 'Failed to submit task');
+      } finally {
+        setUpdating(false);
+      }
+    }
+  };
+
+  const handleApproveTask = async () => {
+    if (!approvalNotes.trim()) {
+      showError('Please add approval notes');
+      return;
+    }
+
+    if (window.confirm('Approve this task completion?')) {
+      try {
+        setUpdating(true);
+        const response = await taskService.approveTaskCompletion(id, approvalNotes);
+        setTask(response.task);
+        showSuccessMessage('Task approved successfully');
+        setApprovalNotes('');
+      } catch (error: any) {
+        showError(error.response?.data?.message || 'Failed to approve task');
+      } finally {
+        setUpdating(false);
+      }
+    }
+  };
+
+  const handleRejectTask = async () => {
+    if (!approvalNotes.trim()) {
+      showError('Please add rejection reason');
+      return;
+    }
+
+    if (window.confirm('Reject this task? The employee will need to resubmit.')) {
+      try {
+        setUpdating(true);
+        const response = await taskService.rejectTaskCompletion(id, approvalNotes);
+        setTask(response.task);
+        showSuccessMessage('Task rejected with feedback');
+        setApprovalNotes('');
+      } catch (error: any) {
+        showError(error.response?.data?.message || 'Failed to reject task');
+      } finally {
+        setUpdating(false);
+      }
     }
   };
 
@@ -193,6 +287,19 @@ const TaskDetail: React.FC = () => {
         return 'warning';
       case 'Medium':
         return 'primary';
+      default:
+        return 'medium';
+    }
+  };
+
+  const getApprovalStatusColor = (approvalStatus: string | undefined) => {
+    switch (approvalStatus) {
+      case 'Approved':
+        return 'success';
+      case 'Pending Approval':
+        return 'warning';
+      case 'Rejected':
+        return 'danger';
       default:
         return 'medium';
     }
@@ -295,6 +402,31 @@ const TaskDetail: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Approval Status Section */}
+            {task.status === 'Completed' && (
+              <div className="approval-status-section" style={{ marginTop: '1rem' }}>
+                <strong style={{ display: 'block', marginBottom: '0.5rem' }}>Approval Status:</strong>
+                <IonBadge color={getApprovalStatusColor(task.approvalStatus)}>
+                  {task.approvalStatus || 'Not Submitted'}
+                </IonBadge>
+                {task.submissionDate && (
+                  <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: '#666' }}>
+                    Submitted: {new Date(task.submissionDate).toLocaleDateString()}
+                  </p>
+                )}
+                {task.approvalDate && (
+                  <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: '#666' }}>
+                    Reviewed: {new Date(task.approvalDate).toLocaleDateString()} by {task.approvedBy?.name}
+                  </p>
+                )}
+                {task.approvalNotes && (
+                  <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                    <small><strong>Feedback:</strong> {task.approvalNotes}</small>
+                  </div>
+                )}
+              </div>
+            )}
           </IonCardContent>
         </IonCard>
 
@@ -326,7 +458,7 @@ const TaskDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {isAssigned && task.status !== 'Completed' && (
+            {isAssigned && task.status !== 'Completed' && (
                   <div className="progress-control">
                     <IonItem>
                     <IonLabel>Update Progress: {newProgress}%</IonLabel>
@@ -340,16 +472,6 @@ const TaskDetail: React.FC = () => {
                     disabled={updating}
                     style={{ width: '100%', margin: '1rem 0' }}
                   />
-                    <IonItem>
-                      <IonLabel>Status</IonLabel>
-                      <IonInput
-                        placeholder="Select Status"
-                        value={newStatus}
-                        onIonChange={(e) => setNewStatus(e.detail.value!)}
-                        disabled={updating}
-                      />
-                    </IonItem>
-
                     <IonButton
                       expand="block"
                       onClick={handleUpdateProgress}
@@ -359,6 +481,113 @@ const TaskDetail: React.FC = () => {
                       {updating ? <IonSpinner name="dots" /> : 'Update Progress'}
                     </IonButton>
                   </div>
+                )}
+
+                {/* Work Evidence Section - Always available for assigned employees */}
+                {isAssigned && task.status !== 'Completed' && (
+                  <IonCard className="ion-margin-top work-evidence-card">
+                    <IonCardHeader>
+                      <IonCardTitle>� Upload Work Proof</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonText color="medium">
+                        <small style={{ display: 'block', marginBottom: '1rem' }}>
+                          📷 Upload photos or screenshots as proof of your work (JPG, PNG only - Max 5MB)
+                        </small>
+                      </IonText>
+
+                      {/* Display current proof if exists */}
+                      {task.completionProofUrl && (
+                        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f7ff', borderRadius: '8px', border: '1px solid #b3d9ff' }}>
+                          <strong style={{ color: '#0066cc' }}>✓ Proof Uploaded:</strong>
+                          <img 
+                            src={task.completionProofUrl} 
+                            alt="Proof" 
+                            style={{ marginTop: '0.5rem', maxWidth: '100%', maxHeight: '150px', borderRadius: '6px', objectFit: 'cover' }}
+                          />
+                        </div>
+                      )}
+
+                      {/* File Input */}
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>
+                          Select Image File
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 5 * 1024 * 1024) {
+                                showError('File size must be less than 5MB');
+                              } else if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+                                showError('Only JPG and PNG images are allowed');
+                              } else {
+                                setProofFile(file);
+                              }
+                            }
+                          }}
+                          disabled={updating}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            padding: '0.75rem',
+                            border: '2px dashed #2196F3',
+                            borderRadius: '6px',
+                            backgroundColor: '#f5f5f5',
+                            cursor: updating ? 'not-allowed' : 'pointer',
+                          }}
+                        />
+                        {proofFile && (
+                          <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+                            📁 Selected: {proofFile.name}
+                          </p>
+                        )}
+                      </div>
+
+                      <IonButton
+                        expand="block"
+                        fill="solid"
+                        color="primary"
+                        onClick={handleUploadProof}
+                        disabled={updating || !proofFile}
+                        className="ion-margin-top"
+                      >
+                        {updating ? <IonSpinner name="dots" /> : '⬆️ Upload Proof'}
+                      </IonButton>
+                    </IonCardContent>
+                  </IonCard>
+                )}
+
+                {/* Submit for Approval - Show when 100% complete */}
+                {isAssigned && newProgress === 100 && task.approvalStatus !== 'Pending Approval' && task.approvalStatus !== 'Approved' && (
+                  <IonCard className="ion-margin-top submit-approval-card">
+                    <IonCardHeader>
+                      <IonCardTitle>✅ Ready to Submit</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonText color="success">
+                        <p><strong>Task is 100% complete!</strong> Submit your proof for HR approval?</p>
+                      </IonText>
+                      {!task.completionProofUrl && (
+                        <IonText color="warning">
+                          <small style={{ display: 'block', marginTop: '0.5rem' }}>
+                            ⚠️ Please upload a proof photo above before submitting
+                          </small>
+                        </IonText>
+                      )}
+                      <IonButton
+                        expand="block"
+                        color="success"
+                        onClick={handleSubmitForApproval}
+                        disabled={updating || !task.completionProofUrl}
+                        className="ion-margin-top"
+                      >
+                        {updating ? <IonSpinner name="dots" /> : '🚀 Submit for HR Approval'}
+                      </IonButton>
+                    </IonCardContent>
+                  </IonCard>
                 )}
               </IonCardContent>
             </IonCard>
@@ -374,6 +603,69 @@ const TaskDetail: React.FC = () => {
                       <span>{emp.name}</span>
                     </div>
                   ))}
+                </IonCardContent>
+              </IonCard>
+            )}
+
+            {/* HR Approval Section */}
+            {user?.role === 'hr' && task.approvalStatus === 'Pending Approval' && (
+              <IonCard className="approval-card">
+                <IonCardHeader>
+                  <IonCardTitle>Review Task Completion</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  <div className="completion-proof-display">
+                    <strong>📸 Employee Submitted Proof:</strong>
+                    {task.completionProofUrl ? (
+                      <img 
+                        src={task.completionProofUrl} 
+                        alt="Task Proof" 
+                        style={{ 
+                          marginTop: '1rem', 
+                          maxWidth: '100%', 
+                          maxHeight: '300px', 
+                          borderRadius: '8px', 
+                          objectFit: 'contain',
+                          border: '1px solid #ddd',
+                          display: 'block'
+                        }}
+                      />
+                    ) : (
+                      <p style={{ marginTop: '0.5rem', color: '#999' }}>No proof submitted</p>
+                    )}
+                  </div>
+
+                  <div style={{ marginTop: '1rem' }}>
+                    <IonItem>
+                      <IonLabel position="stacked">Approval Notes/Feedback</IonLabel>
+                      <IonTextarea
+                        placeholder="Add your approval notes or rejection reason"
+                        value={approvalNotes}
+                        onIonChange={(e) => setApprovalNotes(e.detail.value!)}
+                        rows={3}
+                        disabled={updating}
+                      />
+                    </IonItem>
+                  </div>
+
+                  <div className="approval-buttons">
+                    <IonButton
+                      expand="block"
+                      color="success"
+                      onClick={handleApproveTask}
+                      disabled={updating || !approvalNotes.trim()}
+                    >
+                      ✓ Approve Task
+                    </IonButton>
+                    <IonButton
+                      expand="block"
+                      color="danger"
+                      onClick={handleRejectTask}
+                      disabled={updating || !approvalNotes.trim()}
+                    >
+                      ✗ Reject & Send Back
+                    </IonButton>
+                  </div>
                 </IonCardContent>
               </IonCard>
             )}

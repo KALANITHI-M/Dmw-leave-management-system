@@ -341,7 +341,11 @@ const MyTasks: React.FC<MyTasksProps> = ({ embedded = false }) => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent className="ion-padding">{tasksContent}</IonContent>
+      <IonContent className="ion-padding">
+        <div style={{ paddingBottom: '120px' }}>
+          {tasksContent}
+        </div>
+      </IonContent>
     </IonPage>
   );
 };
