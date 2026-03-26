@@ -282,7 +282,7 @@ const CreateServiceTicket: React.FC = () => {
             <IonItem>
               <IonLabel position="stacked">Expected Due Date (Optional)</IonLabel>
               <IonInput
-                type="datetime-local"
+                type="date"
                 value={dueDate}
                 onIonChange={(e) => setDueDate(e.detail.value || '')}
                 disabled={loading}
