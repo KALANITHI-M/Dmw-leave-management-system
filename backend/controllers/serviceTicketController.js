@@ -154,6 +154,7 @@ export const createServiceTicket = async (req, res) => {
       category: category || 'Other',
       createdBy,
       assignedTo: assignedEngineer, // Assign to engineer if selected
+      status: assignedEngineer ? 'Assigned' : 'Open', // Set status to Assigned if engineer is assigned
       attachments,
       dueDate: dueDate ? new Date(dueDate) : null,
     });
