@@ -5,6 +5,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import EmployeeDashboard from './pages/EmployeeDashboard';
+import ServiceEngineerDashboard from './pages/ServiceEngineerDashboard';
 import HRDashboard from './pages/HRDashboard';
 import TaskDetail from './pages/TaskDetail';
 import CreateTask from './pages/CreateTaskPage';
@@ -88,6 +89,12 @@ const App: React.FC = () => (
               path="/employee/dashboard"
               component={EmployeeDashboard}
               role="employee"
+            />
+            <PrivateRoute
+              exact
+              path="/engineer/dashboard"
+              component={ServiceEngineerDashboard}
+              allowRoles={['service engineer']}
             />
             <PrivateRoute
               exact

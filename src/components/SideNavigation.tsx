@@ -30,6 +30,7 @@ import {
   alertCircleOutline,
   clipboardOutline,
   constructOutline,
+  homeOutline,
 } from 'ionicons/icons';
 import { useAuth } from '../context/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -246,6 +247,37 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                 >
                   <IonIcon icon={constructOutline} slot="start" />
                   <IonLabel>My Service Tickets</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+            </>
+          )}
+
+          {/* Service Engineer Navigation */}
+          {user?.role === 'service engineer' && (
+            <>
+              <IonItem className="nav-section-header">
+                <IonLabel>Work Management</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'dashboard' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('dashboard')}
+                >
+                  <IonIcon icon={homeOutline} slot="start" />
+                  <IonLabel>Dashboard</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'service-tickets' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('service-tickets')}
+                >
+                  <IonIcon icon={constructOutline} slot="start" />
+                  <IonLabel>My Assigned Tickets</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             </>
