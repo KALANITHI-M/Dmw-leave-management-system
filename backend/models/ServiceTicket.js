@@ -7,7 +7,6 @@ const serviceTicketSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: true,
-      index: true,
     },
     title: {
       type: String,
@@ -124,16 +123,6 @@ const serviceTicketSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// Auto-generate ticket number on creation
-serviceTicketSchema.pre('save', async function (next) {
-  if (this.isNew) {
-    // Generate ticket number like TICKET-001, TICKET-002, etc.
-    const count = await mongoose.model('ServiceTicket').countDocuments();
-    this.ticketNumber = `TICKET-${String(count + 1).padStart(6, '0')}`;
-  }
-  next();
-});
 
 // Index for faster queries
 serviceTicketSchema.index({ assignedTo: 1, status: 1 });
