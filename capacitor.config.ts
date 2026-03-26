@@ -14,6 +14,12 @@ const config: CapacitorConfig = {
       style: KeyboardStyle.Dark,
       resizeOnFullScreen: true
     },
+    Camera: {
+      permissions: ['camera']
+    },
+    Geolocation: {
+      permissions: ['location']
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
