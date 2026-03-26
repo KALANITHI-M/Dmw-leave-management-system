@@ -7,9 +7,6 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Add token to requests if available
@@ -27,6 +24,12 @@ api.interceptors.request.use(
         localStorage.removeItem('user');
       }
     }
+
+    // Set Content-Type to application/json only if data is not FormData
+    if (config.data && !(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
   },
   (error) => {

@@ -37,12 +37,18 @@ export const uploadProofMiddleware = multer({
 }).array('proofFiles', 5);
 
 // Upload file to Cloudinary
-const uploadToCloudinary = (buffer, mimetype, filename) =>
+const uploadToCloudinary = (buffer, mimetype, filename, fileExt) =>
   new Promise((resolve, reject) => {
+    // Determine resource type based on file extension
+    let resourceType = 'auto';
+    if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(fileExt?.toLowerCase())) {
+      resourceType = 'raw';
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: 'service-tickets',
-        resource_type: 'auto',
+        resource_type: resourceType,
         public_id: filename,
       },
       (error, result) => {
@@ -108,9 +114,10 @@ export const createServiceTicket = async (req, res) => {
         for (const file of req.files) {
           try {
             const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
-            const filename = `${Date.now()}-${file.originalname}`;
+            const filenameWithoutExt = path.basename(file.originalname, path.extname(file.originalname));
+            const filename = `attachment-${Date.now()}-${filenameWithoutExt}`;
 
-            const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
+            const url = await uploadToCloudinary(file.buffer, file.mimetype, filename, fileExt);
             attachments.push({
               filename: file.originalname,
               url,
@@ -421,10 +428,11 @@ export const uploadProofOfWork = async (req, res) => {
     for (const file of req.files) {
       try {
         const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
-        const filename = `proof-${Date.now()}-${file.originalname}`;
+        const filenameWithoutExt = path.basename(file.originalname, path.extname(file.originalname));
+        const filename = `proof-${Date.now()}-${filenameWithoutExt}`;
         const { description } = req.body;
 
-        const url = await uploadToCloudinary(file.buffer, file.mimetype, filename);
+        const url = await uploadToCloudinary(file.buffer, file.mimetype, filename, fileExt);
 
         ticket.proofOfWork.push({
           filename: file.originalname,
