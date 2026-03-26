@@ -73,10 +73,16 @@ const ServiceTicketManagement: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // Determine user role
+  const userRole = user?.role || 'employee';
+  const isServiceEngineer = userRole === 'service engineer';
+  const isHR = userRole === 'hr';
+  const isEmployee = userRole === 'employee';
+
   useEffect(() => {
     fetchTickets();
     fetchStatistics();
-  }, []);
+  }, [userRole]);
 
   const fetchTickets = async () => {
     try {
@@ -204,56 +210,125 @@ const ServiceTicketManagement: React.FC = () => {
               <IonIcon slot="icon-only" icon={arrowBack} />
             </IonButton>
           </IonButtons>
-          <IonTitle>Service Tickets</IonTitle>
+          <IonTitle>
+            {isServiceEngineer && 'My Assigned Tickets'}
+            {isEmployee && !isServiceEngineer && 'My Service Tickets'}
+            {isHR && 'Service Ticket Management'}
+          </IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={() => history.push('/create-service-ticket')} color="primary">
-              <IonIcon slot="start" icon={add} />
-              New Ticket
-            </IonButton>
+            {!isServiceEngineer && (
+              <IonButton onClick={() => history.push('/create-service-ticket')} color="primary">
+                <IonIcon slot="start" icon={add} />
+                {isEmployee && 'New Ticket'}
+                {isHR && 'New Ticket'}
+              </IonButton>
+            )}
           </IonButtons>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding service-ticket-content">
-        {/* Statistics Cards */}
+        {/* Role-Specific Statistics Cards */}
         {statistics && (
           <div className="statistics-grid">
-            <div className="stat-card total">
-              <div className="stat-label">Total</div>
-              <div className="stat-value">{statistics.total}</div>
-            </div>
-            <div className="stat-card open">
-              <div className="stat-label">Open</div>
-              <div className="stat-value">{statistics.open}</div>
-            </div>
-            <div className="stat-card assigned">
-              <div className="stat-label">Assigned</div>
-              <div className="stat-value">{statistics.assigned}</div>
-            </div>
-            <div className="stat-card progress">
-              <div className="stat-label">In Progress</div>
-              <div className="stat-value">{statistics.inProgress}</div>
-            </div>
-            <div className="stat-card resolved">
-              <div className="stat-label">Resolved</div>
-              <div className="stat-value">{statistics.resolved}</div>
-            </div>
-            <div className="stat-card closed">
-              <div className="stat-label">Closed</div>
-              <div className="stat-value">{statistics.closed}</div>
-            </div>
+            {/* Service Engineer View - Focused on their assigned work */}
+            {isServiceEngineer && (
+              <>
+                <div className="stat-card total">
+                  <div className="stat-label">Assigned to Me</div>
+                  <div className="stat-value">{tickets.length}</div>
+                </div>
+                <div className="stat-card progress">
+                  <div className="stat-label">In Progress</div>
+                  <div className="stat-value">
+                    {tickets.filter((t) => t.status === 'In Progress').length}
+                  </div>
+                </div>
+                <div className="stat-card resolved">
+                  <div className="stat-label">Resolved</div>
+                  <div className="stat-value">
+                    {tickets.filter((t) => t.status === 'Resolved').length}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Employee View - Shows their created and assigned tickets */}
+            {isEmployee && !isServiceEngineer && (
+              <>
+                <div className="stat-card total">
+                  <div className="stat-label">Total</div>
+                  <div className="stat-value">{statistics.total}</div>
+                </div>
+                <div className="stat-card open">
+                  <div className="stat-label">Open</div>
+                  <div className="stat-value">{statistics.open}</div>
+                </div>
+                <div className="stat-card assigned">
+                  <div className="stat-label">Assigned</div>
+                  <div className="stat-value">{statistics.assigned}</div>
+                </div>
+                <div className="stat-card progress">
+                  <div className="stat-label">In Progress</div>
+                  <div className="stat-value">{statistics.inProgress}</div>
+                </div>
+                <div className="stat-card resolved">
+                  <div className="stat-label">Resolved</div>
+                  <div className="stat-value">{statistics.resolved}</div>
+                </div>
+                <div className="stat-card closed">
+                  <div className="stat-label">Closed</div>
+                  <div className="stat-value">{statistics.closed}</div>
+                </div>
+              </>
+            )}
+
+            {/* HR View - Comprehensive statistics for all tickets */}
+            {isHR && (
+              <>
+                <div className="stat-card total">
+                  <div className="stat-label">Total</div>
+                  <div className="stat-value">{statistics.total}</div>
+                </div>
+                <div className="stat-card open">
+                  <div className="stat-label">Open</div>
+                  <div className="stat-value">{statistics.open}</div>
+                </div>
+                <div className="stat-card assigned">
+                  <div className="stat-label">Assigned</div>
+                  <div className="stat-value">{statistics.assigned}</div>
+                </div>
+                <div className="stat-card progress">
+                  <div className="stat-label">In Progress</div>
+                  <div className="stat-value">{statistics.inProgress}</div>
+                </div>
+                <div className="stat-card resolved">
+                  <div className="stat-label">Resolved</div>
+                  <div className="stat-value">{statistics.resolved}</div>
+                </div>
+                <div className="stat-card closed">
+                  <div className="stat-label">Closed</div>
+                  <div className="stat-value">{statistics.closed}</div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* Search and Filters */}
+        {/* Search and Filters - Different for each role */}
         <IonSearchbar
           value={searchText}
           onIonChange={(e) => setSearchText(e.detail.value || '')}
-          placeholder="Search by ticket number or title..."
+          placeholder={
+            isServiceEngineer
+              ? 'Search your assigned tickets...'
+              : 'Search by ticket number or title...'
+          }
           className="ion-margin-bottom"
           autocapitalize="off"
         />
 
+        {/* Filters - Simplified for Service Engineers */}
         <div className="filter-row">
           <IonSelect
             value={selectedStatus}
@@ -261,46 +336,56 @@ const ServiceTicketManagement: React.FC = () => {
             placeholder="Filter by Status"
           >
             <IonSelectOption value="all">All Status</IonSelectOption>
-            <IonSelectOption value="Open">Open</IonSelectOption>
-            <IonSelectOption value="Assigned">Assigned</IonSelectOption>
+            {!isServiceEngineer && <IonSelectOption value="Open">Open</IonSelectOption>}
+            {!isServiceEngineer && <IonSelectOption value="Assigned">Assigned</IonSelectOption>}
             <IonSelectOption value="In Progress">In Progress</IonSelectOption>
             <IonSelectOption value="Resolved">Resolved</IonSelectOption>
-            <IonSelectOption value="Closed">Closed</IonSelectOption>
+            {!isServiceEngineer && <IonSelectOption value="Closed">Closed</IonSelectOption>}
           </IonSelect>
 
-          <IonSelect
-            value={selectedPriority}
-            onIonChange={(e) => setSelectedPriority(e.detail.value)}
-            placeholder="Filter by Priority"
-          >
-            <IonSelectOption value="all">All Priorities</IonSelectOption>
-            <IonSelectOption value="Low">Low</IonSelectOption>
-            <IonSelectOption value="Medium">Medium</IonSelectOption>
-            <IonSelectOption value="High">High</IonSelectOption>
-            <IonSelectOption value="Critical">Critical</IonSelectOption>
-          </IonSelect>
+          {!isServiceEngineer && (
+            <IonSelect
+              value={selectedPriority}
+              onIonChange={(e) => setSelectedPriority(e.detail.value)}
+              placeholder="Filter by Priority"
+            >
+              <IonSelectOption value="all">All Priorities</IonSelectOption>
+              <IonSelectOption value="Low">Low</IonSelectOption>
+              <IonSelectOption value="Medium">Medium</IonSelectOption>
+              <IonSelectOption value="High">High</IonSelectOption>
+              <IonSelectOption value="Critical">Critical</IonSelectOption>
+            </IonSelect>
+          )}
 
-          <IonSelect
-            value={selectedCategory}
-            onIonChange={(e) => setSelectedCategory(e.detail.value)}
-            placeholder="Filter by Category"
-          >
-            <IonSelectOption value="all">All Categories</IonSelectOption>
-            <IonSelectOption value="Machine Failure">Machine Failure</IonSelectOption>
-            <IonSelectOption value="Maintenance Request">Maintenance Request</IonSelectOption>
-            <IonSelectOption value="Technical Support">Technical Support</IonSelectOption>
-            <IonSelectOption value="Software Issue">Software Issue</IonSelectOption>
-            <IonSelectOption value="Hardware Issue">Hardware Issue</IonSelectOption>
-            <IonSelectOption value="Other">Other</IonSelectOption>
-          </IonSelect>
+          {!isServiceEngineer && (
+            <IonSelect
+              value={selectedCategory}
+              onIonChange={(e) => setSelectedCategory(e.detail.value)}
+              placeholder="Filter by Category"
+            >
+              <IonSelectOption value="all">All Categories</IonSelectOption>
+              <IonSelectOption value="Machine Failure">Machine Failure</IonSelectOption>
+              <IonSelectOption value="Maintenance Request">Maintenance Request</IonSelectOption>
+              <IonSelectOption value="Technical Support">Technical Support</IonSelectOption>
+              <IonSelectOption value="Software Issue">Software Issue</IonSelectOption>
+              <IonSelectOption value="Hardware Issue">Hardware Issue</IonSelectOption>
+              <IonSelectOption value="Other">Other</IonSelectOption>
+            </IonSelect>
+          )}
         </div>
 
-        {/* Tickets List */}
+        {/* Tickets List - Role-Specific Display */}
         {tickets.length === 0 ? (
           <IonCard>
             <IonCardContent>
               <IonText color="medium">
-                <p style={{ textAlign: 'center' }}>No tickets found</p>
+                <p style={{ textAlign: 'center' }}>
+                  {isServiceEngineer
+                    ? 'No tickets assigned to you'
+                    : isEmployee
+                    ? 'No tickets found'
+                    : 'No tickets in the system'}
+                </p>
               </IonText>
             </IonCardContent>
           </IonCard>
@@ -319,11 +404,50 @@ const ServiceTicketManagement: React.FC = () => {
                     <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <IonBadge color={getStatusColor(ticket.status)}>{ticket.status}</IonBadge>
                       <IonBadge color={getPriorityColor(ticket.priority)}>{ticket.priority}</IonBadge>
-                      <IonBadge color="secondary">{ticket.category}</IonBadge>
+                      {!isServiceEngineer && (
+                        <IonBadge color="secondary">{ticket.category}</IonBadge>
+                      )}
                     </div>
-                    {ticket.assignedTo && (
+
+                    {/* Show different info based on role */}
+                    {isServiceEngineer && (
+                      <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#666' }}>
+                        <p style={{ margin: '0.25rem 0' }}>
+                          <strong>Created by:</strong> {ticket.createdBy?.name}
+                        </p>
+                        {ticket.dueDate && (
+                          <p style={{ margin: '0.25rem 0' }}>
+                            <strong>Due:</strong>{' '}
+                            {new Date(ticket.dueDate).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {isEmployee && !isServiceEngineer && (
+                      <>
+                        {ticket.assignedTo && (
+                          <p style={{ margin: '0.5rem 0 0 0', color: '#888', fontSize: '0.85rem' }}>
+                            Assigned to: <strong>{ticket.assignedTo.name}</strong>
+                          </p>
+                        )}
+                        {!ticket.assignedTo && ticket.status === 'Open' && (
+                          <p style={{ margin: '0.5rem 0 0 0', color: '#ff6b00', fontSize: '0.85rem' }}>
+                            ⚠️ <strong>Awaiting Assignment</strong>
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {isHR && (
                       <p style={{ margin: '0.5rem 0 0 0', color: '#888', fontSize: '0.85rem' }}>
-                        Assigned to: <strong>{ticket.assignedTo.name}</strong>
+                        Created by:{' '}
+                        <strong>{ticket.createdBy?.name || 'Unknown'}</strong>
+                        {ticket.assignedTo && (
+                          <>
+                            {' '} | Assigned to: <strong>{ticket.assignedTo.name}</strong>
+                          </>
+                        )}
                       </p>
                     )}
                   </div>
@@ -340,11 +464,14 @@ const ServiceTicketManagement: React.FC = () => {
           ))
         )}
 
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => history.push('/create-service-ticket')}>
-            <IonIcon icon={add} />
-          </IonFabButton>
-        </IonFab>
+        {/* FAB Button - Only for Employee and HR, not Service Engineers */}
+        {!isServiceEngineer && (
+          <IonFab vertical="bottom" horizontal="end" slot="fixed">
+            <IonFabButton onClick={() => history.push('/create-service-ticket')}>
+              <IonIcon icon={add} />
+            </IonFabButton>
+          </IonFab>
+        )}
 
         <IonToast
           isOpen={showToast}

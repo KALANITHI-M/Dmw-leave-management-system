@@ -25,6 +25,7 @@ import {
 import { arrowBack, close, cloudUpload } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { serviceTicketService } from '../api/serviceTicketService';
+import { useAuth } from '../context/AuthContext';
 import './CreateServiceTicket.css';
 
 interface Attachment {
@@ -35,6 +36,7 @@ interface Attachment {
 
 const CreateServiceTicket: React.FC = () => {
   const history = useHistory();
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
@@ -45,6 +47,9 @@ const CreateServiceTicket: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState('danger');
+
+  // Check if user is service engineer - they cannot create tickets
+  const isServiceEngineer = user?.role === 'service engineer';
 
   const showError = (message: string) => {
     setToastMessage(message);
@@ -142,6 +147,43 @@ const CreateServiceTicket: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Service engineers cannot create tickets
+  if (isServiceEngineer) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => history.goBack()}>
+                <IonIcon slot="icon-only" icon={arrowBack} />
+              </IonButton>
+            </IonButtons>
+            <IonTitle>Create Service Ticket</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <IonCard>
+            <IonCardContent>
+              <IonText color="danger">
+                <p style={{ textAlign: 'center', marginTop: '2rem' }}>
+                  ⚠️ <strong>Access Denied</strong>
+                </p>
+                <p style={{ textAlign: 'center' }}>
+                  Service Engineers cannot create new tickets. Your role is to work on assigned tickets.
+                </p>
+                <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <IonButton expand="block" onClick={() => history.push('/service-tickets')}>
+                    View My Assigned Tickets
+                  </IonButton>
+                </p>
+              </IonText>
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  }
 
   return (
     <IonPage>

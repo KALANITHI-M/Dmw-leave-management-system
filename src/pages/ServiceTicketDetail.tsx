@@ -211,10 +211,29 @@ const ServiceTicketDetail: React.FC = () => {
     }
   };
 
-  const canAssignTicket = user && user.role === 'hr';
-  const canUpdateStatus = (ticket?.assignedTo?._id === user?._id) || (user && user.role === 'hr');
-  const canUploadProof = ticket?.assignedTo?._id === user?._id;
-  const canClose = user && user.role === 'hr';
+  // Role-based permissions
+  const userRole = user?.role || 'employee';
+  const isServiceEngineer = userRole === 'service engineer';
+  const isHR = userRole === 'hr';
+  const isEmployee = userRole === 'employee';
+  const isAssignedEngineer = ticket?.assignedTo?._id === user?._id;
+  const isCreator = ticket?.createdBy?._id === user?._id;
+
+  // Permission checks
+  const canAssignTicket = isHR;
+  const canUpdateStatus = isAssignedEngineer || isHR;
+  const canUploadProof = isAssignedEngineer; // Only assigned service engineer can upload proof
+  const canClose = isHR;
+  const canAddInternalComment = isHR; // Only HR can add internal comments
+  const canManageTicket = isHR || isAssignedEngineer || isCreator;
+
+  // Access control: Service engineers can only view their assigned tickets
+  const hasAccessToTicket = () => {
+    if (isHR) return true; // HR can view all
+    if (isServiceEngineer) return isAssignedEngineer; // Service engineers can only view their assigned tickets
+    if (isEmployee) return isCreator || isAssignedEngineer; // Employees can view their created or assigned tickets
+    return false;
+  };
 
   if (loading) {
     return (
@@ -253,7 +272,43 @@ const ServiceTicketDetail: React.FC = () => {
         </IonHeader>
         <IonContent className="ion-padding">
           <IonText color="danger">
-            <p style={{ textAlign: 'center' }}>Ticket not found</p>
+            <p style={{ textAlign: 'center', marginTop: '2rem' }}>
+              {isServiceEngineer
+                ? 'This ticket is not assigned to you. You do not have access to view this ticket.'
+                : 'Ticket not found or you do not have access to view it.'}
+            </p>
+          </IonText>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  // Access control: Prevent unauthorized access
+  if (!hasAccessToTicket()) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => history.goBack()}>
+                <IonIcon slot="icon-only" icon={arrowBack} />
+              </IonButton>
+            </IonButtons>
+            <IonTitle>Service Ticket</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <IonText color="danger">
+            <p style={{ textAlign: 'center', marginTop: '2rem' }}>
+              {isServiceEngineer
+                ? '⚠️ Access Denied: This ticket is not assigned to you.'
+                : '⚠️ Access Denied: You do not have permission to view this ticket.'}
+            </p>
+          </IonText>
+        </IonContent>
+      </IonPage>
+    );
+  }  <p style={{ textAlign: 'center' }}>Ticket not found</p>
           </IonText>
         </IonContent>
       </IonPage>
@@ -530,7 +585,7 @@ const ServiceTicketDetail: React.FC = () => {
 
             {/* Comments List */}
             <div style={{ marginTop: '1.5rem' }}>
-              {comments.length === 0 ? (
+              {comments.filter((c) => !c.isInternal || isHR).length === 0 ? (
                 <IonCard>
                   <IonCardContent>
                     <IonText color="medium">
@@ -539,20 +594,28 @@ const ServiceTicketDetail: React.FC = () => {
                   </IonCardContent>
                 </IonCard>
               ) : (
-                comments.map((comment) => (
-                  <IonCard key={comment._id} style={{ marginBottom: '1rem' }}>
-                    <IonCardContent>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                        <div>
-                          <strong>{comment.createdBy.name}</strong>
-                          {comment.isInternal && <IonBadge color="warning" style={{ marginLeft: '0.5rem' }}>Internal</IonBadge>}
+                comments
+                  .filter((c) => !c.isInternal || isHR) // Hide internal comments from non-HR users
+                  .map((comment) => (
+                    <IonCard key={comment._id} style={{ marginBottom: '1rem' }}>
+                      <IonCardContent>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                          <div>
+                            <strong>{comment.createdBy.name}</strong>
+                            {comment.isInternal && (
+                              <IonBadge color="warning" style={{ marginLeft: '0.5rem' }}>
+                                🔒 Internal
+                              </IonBadge>
+                            )}
+                          </div>
+                          <small style={{ color: '#999' }}>
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </small>
                         </div>
-                        <small style={{ color: '#999' }}>{new Date(comment.createdAt).toLocaleDateString()}</small>
-                      </div>
-                      <p style={{ margin: '0.5rem 0', color: '#555' }}>{comment.content}</p>
-                    </IonCardContent>
-                  </IonCard>
-                ))
+                        <p style={{ margin: '0.5rem 0', color: '#555' }}>{comment.content}</p>
+                      </IonCardContent>
+                    </IonCard>
+                  ))
               )}
             </div>
           </>
