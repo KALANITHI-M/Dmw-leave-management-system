@@ -65,7 +65,7 @@ const CreateServiceTicket: React.FC = () => {
       const employees = await employeeService.getAllEmployees();
       // Filter for service engineers only
       const engineers = employees.filter(
-        (emp) => emp.role === 'service engineer' || emp.designation === 'service engineer'
+        (emp) => emp.designation === 'service engineer'
       );
       setServiceEngineers(engineers);
       console.log('[DEBUG] Loaded service engineers:', engineers.length);

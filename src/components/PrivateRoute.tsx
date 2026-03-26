@@ -41,7 +41,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 
         // Check role access - either single role or allowRoles array
         if (allowRoles && allowRoles.length > 0) {
-          if (!allowRoles.includes(persistedUser?.role)) {
+          if (!persistedUser?.role || !allowRoles.includes(persistedUser.role)) {
             return <Redirect to="/login" />;
           }
         } else if (role && persistedUser?.role !== role) {
