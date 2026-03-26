@@ -11,7 +11,7 @@ import { protect, hrOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', protect, hrOnly, getAllEmployees);
+router.get('/', protect, getAllEmployees);
 router.get('/stats', protect, hrOnly, getEmployeeStats);
 router.post('/service-engineer/create', protect, hrOnly, createServiceEngineer);
 router.get('/:id', protect, hrOnly, getEmployeeById);
