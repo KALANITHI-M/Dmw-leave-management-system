@@ -345,7 +345,7 @@ const ProfileSection: React.FC = () => {
                   <IonItem lines="none" className="profile-detail-item">
                     <IonLabel position="stacked" className="profile-label">Role</IonLabel>
                     <IonInput
-                      value={user?.role === 'hr' ? 'HR Manager' : 'Employee'}
+                      value={user?.role === 'hr' ? 'HR Manager' : user?.role === 'service engineer' ? 'Service Engineer' : 'Employee'}
                       readonly
                       className="profile-input"
                     />

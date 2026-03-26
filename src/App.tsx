@@ -122,19 +122,19 @@ const App: React.FC = () => (
               exact
               path="/service-tickets"
               component={ServiceTicketManagement}
-              role="employee"
+              allowRoles={['employee', 'service engineer']}
             />
             <PrivateRoute
               exact
               path="/create-service-ticket"
               component={CreateServiceTicket}
-              role="employee"
+              allowRoles={['employee']}
             />
             <PrivateRoute
               exact
               path="/service-ticket/:id"
               component={ServiceTicketDetail}
-              role="employee"
+              allowRoles={['employee', 'service engineer']}
             />
             <Route exact path="/">
               <Redirect to="/login" />

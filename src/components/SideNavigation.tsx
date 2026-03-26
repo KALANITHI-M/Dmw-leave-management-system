@@ -112,7 +112,9 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
             </IonAvatar>
             <h3 className="profile-name">{user?.name}</h3>
             <p className="profile-id">ID: {user?.employeeId}</p>
-            <p className="profile-role">{user?.role === 'hr' ? 'HR Manager' : 'Employee'}</p>
+            <p className="profile-role">
+              {user?.role === 'hr' ? 'HR Manager' : user?.role === 'service engineer' ? 'Service Engineer' : 'Employee'}
+            </p>
           </IonCardContent>
         </IonCard>
 

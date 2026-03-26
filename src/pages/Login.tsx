@@ -51,6 +51,8 @@ const Login: React.FC = () => {
       
       if (userData.role === 'hr') {
         history.replace('/hr/dashboard');
+      } else if (userData.role === 'service engineer') {
+        history.replace('/service-tickets');
       } else {
         history.replace('/employee/dashboard');
       }

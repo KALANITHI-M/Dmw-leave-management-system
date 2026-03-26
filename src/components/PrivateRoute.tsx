@@ -5,12 +5,14 @@ import { useAuth } from '../context/AuthContext';
 interface PrivateRouteProps extends RouteProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<any>;
-  role?: 'employee' | 'hr';
+  role?: 'employee' | 'hr' | 'service engineer';
+  allowRoles?: ('employee' | 'hr' | 'service engineer')[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ 
   component: Component, 
   role,
+  allowRoles,
   ...rest 
 }) => {
   const { user, isAuthenticated } = useAuth();
@@ -37,7 +39,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
           return <Redirect to="/login" />;
         }
 
-        if (role && persistedUser?.role !== role) {
+        // Check role access - either single role or allowRoles array
+        if (allowRoles && allowRoles.length > 0) {
+          if (!allowRoles.includes(persistedUser?.role)) {
+            return <Redirect to="/login" />;
+          }
+        } else if (role && persistedUser?.role !== role) {
           return <Redirect to="/login" />;
         }
 
