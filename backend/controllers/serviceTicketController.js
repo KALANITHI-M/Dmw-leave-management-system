@@ -132,6 +132,19 @@ export const createServiceTicket = async (req, res) => {
     const ticketCount = await ServiceTicket.countDocuments();
     const ticketNumber = `ST-${String(ticketCount + 1).padStart(5, '0')}`;
 
+    // Validate assigned engineer if provided
+    let assignedEngineer = null;
+    if (req.body.assignedTo) {
+      const engineer = await Employee.findById(req.body.assignedTo);
+      if (!engineer) {
+        return res.status(400).json({ message: 'Selected service engineer not found' });
+      }
+      if (engineer.role !== 'service engineer' && engineer.designation !== 'service engineer') {
+        return res.status(400).json({ message: 'Selected employee is not a service engineer' });
+      }
+      assignedEngineer = engineer._id;
+    }
+
     // Create ticket
     const ticket = new ServiceTicket({
       ticketNumber, // Add ticket number
@@ -140,6 +153,7 @@ export const createServiceTicket = async (req, res) => {
       priority,
       category: category || 'Other',
       createdBy,
+      assignedTo: assignedEngineer, // Assign to engineer if selected
       attachments,
       dueDate: dueDate ? new Date(dueDate) : null,
     });
@@ -588,5 +602,45 @@ export const deleteTicketComment = async (req, res) => {
   } catch (error) {
     console.error('Error deleting comment:', error);
     res.status(500).json({ message: 'Error deleting comment', error: error.message });
+  }
+};
+
+// Delete service ticket (HR or creator only, ticket must be Open or Assigned)
+export const deleteServiceTicket = async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    const ticket = await ServiceTicket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    // Permission check: Only HR or ticket creator can delete
+    if (userRole !== 'hr' && ticket.createdBy.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this ticket' });
+    }
+
+    // Status check: Can only delete if Open or Assigned
+    if (!['Open', 'Assigned'].includes(ticket.status)) {
+      return res.status(400).json({
+        message: `Cannot delete ticket with status '${ticket.status}'. Only tickets with status 'Open' or 'Assigned' can be deleted.`,
+      });
+    }
+
+    // Delete all related comments
+    await ServiceTicketComment.deleteMany({ ticket: ticketId });
+
+    // Delete all related activity logs
+    await ServiceTicketActivity.deleteMany({ ticket: ticketId });
+
+    // Delete the ticket itself
+    await ServiceTicket.findByIdAndDelete(ticketId);
+
+    res.json({ message: 'Ticket deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting ticket:', error);
+    res.status(500).json({ message: 'Error deleting ticket', error: error.message });
   }
 };

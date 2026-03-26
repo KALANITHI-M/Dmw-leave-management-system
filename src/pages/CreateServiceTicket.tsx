@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonContent,
   IonPage,
@@ -25,6 +25,7 @@ import {
 import { arrowBack, close, cloudUpload } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { serviceTicketService } from '../api/serviceTicketService';
+import { employeeService, Employee } from '../api/employeeService';
 import { useAuth } from '../context/AuthContext';
 import './CreateServiceTicket.css';
 
@@ -47,9 +48,34 @@ const CreateServiceTicket: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState('danger');
+  const [serviceEngineers, setServiceEngineers] = useState<Employee[]>([]);
+  const [selectedEngineer, setSelectedEngineer] = useState('');
+  const [loadingEngineers, setLoadingEngineers] = useState(false);
 
   // Check if user is service engineer - they cannot create tickets
   const isServiceEngineer = user?.role === 'service engineer' || user?.designation === 'service engineer';
+
+  useEffect(() => {
+    loadServiceEngineers();
+  }, []);
+
+  const loadServiceEngineers = async () => {
+    setLoadingEngineers(true);
+    try {
+      const employees = await employeeService.getAllEmployees();
+      // Filter for service engineers only
+      const engineers = employees.filter(
+        (emp) => emp.role === 'service engineer' || emp.designation === 'service engineer'
+      );
+      setServiceEngineers(engineers);
+      console.log('[DEBUG] Loaded service engineers:', engineers.length);
+    } catch (error: any) {
+      console.error('[ERROR] Failed to load service engineers:', error);
+      showError('Failed to load service engineers');
+    } finally {
+      setLoadingEngineers(false);
+    }
+  };
 
   const showError = (message: string) => {
     setToastMessage(message);
@@ -115,6 +141,10 @@ const CreateServiceTicket: React.FC = () => {
       showError('Please select a priority level');
       return;
     }
+    if (!selectedEngineer) {
+      showError('Please assign this ticket to a service engineer');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -125,6 +155,7 @@ const CreateServiceTicket: React.FC = () => {
       formData.append('description', description);
       formData.append('priority', priority);
       formData.append('category', category);
+      formData.append('assignedTo', selectedEngineer);
       if (dueDate) {
         formData.append('dueDate', dueDate);
       }
@@ -135,7 +166,7 @@ const CreateServiceTicket: React.FC = () => {
         formData.append('attachments', att.file);
       });
 
-      console.log('[DEBUG] Creating ticket with title:', title);
+      console.log('[DEBUG] Creating ticket with title:', title, 'assigned to:', selectedEngineer);
       const response = await serviceTicketService.createTicket(formData);
       
       if (response.ticket && response.ticket.ticketNumber) {
@@ -276,6 +307,38 @@ const CreateServiceTicket: React.FC = () => {
                 <IonSelectOption value="Hardware Issue">Hardware Issue</IonSelectOption>
                 <IonSelectOption value="Other">Other</IonSelectOption>
               </IonSelect>
+            </IonItem>
+
+            {/* Assign to Service Engineer */}
+            <IonItem>
+              <IonLabel position="stacked">
+                Assign to Service Engineer <span style={{ color: 'red' }}>*</span>
+              </IonLabel>
+              {loadingEngineers ? (
+                <div style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <IonSpinner name="crescent" style={{ width: '20px', height: '20px' }} />
+                  <span>Loading engineers...</span>
+                </div>
+              ) : (
+                <IonSelect
+                  value={selectedEngineer}
+                  onIonChange={(e) => setSelectedEngineer(e.detail.value)}
+                  disabled={loading || loadingEngineers || serviceEngineers.length === 0}
+                  placeholder="Select a service engineer"
+                >
+                  {serviceEngineers.length === 0 ? (
+                    <IonSelectOption value="" disabled>
+                      No service engineers available
+                    </IonSelectOption>
+                  ) : (
+                    serviceEngineers.map((engineer) => (
+                      <IonSelectOption key={engineer._id} value={engineer._id}>
+                        {engineer.name} ({engineer.employeeId})
+                      </IonSelectOption>
+                    ))
+                  )}
+                </IonSelect>
+              )}
             </IonItem>
 
             {/* Due Date */}

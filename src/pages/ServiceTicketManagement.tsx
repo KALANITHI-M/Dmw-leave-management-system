@@ -25,8 +25,10 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonAlert,
+  useIonAlert,
 } from '@ionic/react';
-import { add, arrowBack, eye, checkmark } from 'ionicons/icons';
+import { add, arrowBack, eye, checkmark, trash } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { serviceTicketService } from '../api/serviceTicketService';
 import { useAuth } from '../context/AuthContext';
@@ -40,8 +42,8 @@ interface ServiceTicket {
   priority: string;
   status: string;
   category: string;
-  createdBy?: { name: string; email: string };
-  assignedTo?: { name: string; email: string };
+  createdBy?: { _id: string; name: string; email: string };
+  assignedTo?: { _id: string; name: string; email: string };
   createdAt: string;
   dueDate?: string;
   proofOfWork?: any[];
@@ -61,6 +63,7 @@ interface Statistics {
 const ServiceTicketManagement: React.FC = () => {
   const history = useHistory();
   const { user } = useAuth();
+  const [present] = useIonAlert();
   const [tickets, setTickets] = useState<ServiceTicket[]>([]);
   const [allTickets, setAllTickets] = useState<ServiceTicket[]>([]);
   const [statistics, setStatistics] = useState<Statistics | null>(null);
@@ -145,6 +148,33 @@ const ServiceTicketManagement: React.FC = () => {
     setToastMessage(message);
     setToastColor('success');
     setShowToast(true);
+  };
+
+  const handleDeleteTicket = async (ticketId: string, ticketNumber: string) => {
+    present({
+      header: 'Delete Ticket?',
+      message: `Are you sure you want to delete ticket ${ticketNumber}? This action cannot be undone.`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            try {
+              await serviceTicketService.deleteTicket(ticketId);
+              showSuccessMessage('Ticket deleted successfully');
+              // Refresh the tickets list
+              fetchTickets();
+            } catch (error: any) {
+              showError(error.response?.data?.message || 'Failed to delete ticket');
+            }
+          },
+        },
+      ],
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -451,13 +481,24 @@ const ServiceTicketManagement: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  <IonButton
-                    color="primary"
-                    onClick={() => history.push(`/service-ticket/${ticket._id}`)}
-                    style={{ marginTop: 0 }}
-                  >
-                    <IonIcon slot="icon-only" icon={eye} />
-                  </IonButton>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: 0 }}>
+                    <IonButton
+                      color="primary"
+                      onClick={() => history.push(`/service-ticket/${ticket._id}`)}
+                    >
+                      <IonIcon slot="icon-only" icon={eye} />
+                    </IonButton>
+                    {/* Delete button - only for HR or creator when ticket is Open or Assigned */}
+                    {(isHR || (isEmployee && !isServiceEngineer && ticket.createdBy?._id === user?._id)) &&
+                      ['Open', 'Assigned'].includes(ticket.status) && (
+                        <IonButton
+                          color="danger"
+                          onClick={() => handleDeleteTicket(ticket._id, ticket.ticketNumber)}
+                        >
+                          <IonIcon slot="icon-only" icon={trash} />
+                        </IonButton>
+                      )}
+                  </div>
                 </div>
               </IonCardContent>
             </IonCard>

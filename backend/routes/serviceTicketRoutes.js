@@ -11,6 +11,7 @@ import {
   getTicketStatistics,
   rejectResolution,
   deleteTicketComment,
+  deleteServiceTicket,
   uploadFileMiddleware,
   uploadProofMiddleware,
 } from '../controllers/serviceTicketController.js';
@@ -49,5 +50,8 @@ router.post('/:id/comments', addTicketComment);
 
 // Delete comment
 router.delete('/:id/comments/:commentId', deleteTicketComment);
+
+// Delete ticket (HR or creator only)
+router.delete('/:id', deleteServiceTicket);
 
 export default router;

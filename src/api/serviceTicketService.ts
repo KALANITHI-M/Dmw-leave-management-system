@@ -120,4 +120,21 @@ export const serviceTicketService = {
     );
     return response.data;
   },
+
+  // Delete ticket
+  deleteTicket: async (ticketId: string) => {
+    try {
+      console.log('[DEBUG] Deleting service ticket:', ticketId);
+      const response = await axiosInstance.delete(`${SERVICE_TICKETS_API}/${ticketId}`);
+      console.log('[DEBUG] Service ticket deleted successfully:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[ERROR] Service ticket deletion failed:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
 };
