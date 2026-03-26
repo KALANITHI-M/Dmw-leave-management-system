@@ -49,7 +49,7 @@ const CreateServiceTicket: React.FC = () => {
   const [toastColor, setToastColor] = useState('danger');
 
   // Check if user is service engineer - they cannot create tickets
-  const isServiceEngineer = user?.role === 'service engineer';
+  const isServiceEngineer = user?.role === 'service engineer' || user?.designation === 'service engineer';
 
   const showError = (message: string) => {
     setToastMessage(message);

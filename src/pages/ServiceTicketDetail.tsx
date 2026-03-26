@@ -213,7 +213,7 @@ const ServiceTicketDetail: React.FC = () => {
 
   // Role-based permissions
   const userRole = user?.role || 'employee';
-  const isServiceEngineer = userRole === 'service engineer';
+  const isServiceEngineer = userRole === 'service engineer' || user?.designation === 'service engineer';
   const isHR = userRole === 'hr';
   const isEmployee = userRole === 'employee';
   const isAssignedEngineer = ticket?.assignedTo?._id === user?._id;

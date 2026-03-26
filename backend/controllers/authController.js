@@ -89,6 +89,15 @@ export const login = async (req, res) => {
     const employee = await Employee.findOne({ email }).select('+password');
 
     if (employee && (await employee.matchPassword(password))) {
+      // Check if designation is "service engineer" but role is still "employee"
+      // If so, update the role to match the designation
+      let userRole = employee.role;
+      if (employee.designation === 'service engineer' && employee.role === 'employee') {
+        employee.role = 'service engineer';
+        await employee.save();
+        userRole = 'service engineer';
+      }
+
       res.json({
         _id: employee._id,
         employeeId: employee.employeeId,
@@ -97,8 +106,8 @@ export const login = async (req, res) => {
         department: employee.department,
         designation: employee.designation,
         phoneNumber: employee.phoneNumber,
-        role: employee.role,
-        token: generateToken(employee._id, employee.role),
+        role: userRole,
+        token: generateToken(employee._id, userRole),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });

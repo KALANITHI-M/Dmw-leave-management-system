@@ -75,7 +75,7 @@ const ServiceTicketManagement: React.FC = () => {
 
   // Determine user role
   const userRole = user?.role || 'employee';
-  const isServiceEngineer = userRole === 'service engineer';
+  const isServiceEngineer = userRole === 'service engineer' || user?.designation === 'service engineer';
   const isHR = userRole === 'hr';
   const isEmployee = userRole === 'employee';
 
