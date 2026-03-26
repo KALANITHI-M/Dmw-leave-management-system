@@ -308,11 +308,6 @@ const ServiceTicketDetail: React.FC = () => {
         </IonContent>
       </IonPage>
     );
-  }  <p style={{ textAlign: 'center' }}>Ticket not found</p>
-          </IonText>
-        </IonContent>
-      </IonPage>
-    );
   }
 
   return (

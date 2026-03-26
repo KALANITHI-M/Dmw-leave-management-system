@@ -130,19 +130,31 @@ const CreateServiceTicket: React.FC = () => {
       }
 
       // Add attachments
+      console.log('[DEBUG] Adding attachments:', attachments.length);
       attachments.forEach((att) => {
         formData.append('attachments', att.file);
       });
 
+      console.log('[DEBUG] Creating ticket with title:', title);
       const response = await serviceTicketService.createTicket(formData);
-      showSuccessMessage(`Ticket ${response.ticket.ticketNumber} created successfully!`);
-
-      // Redirect after 1 second
-      setTimeout(() => {
-        history.push('/service-tickets');
-      }, 1000);
+      
+      if (response.ticket && response.ticket.ticketNumber) {
+        showSuccessMessage(`Ticket ${response.ticket.ticketNumber} created successfully!`);
+        
+        // Redirect after 1 second
+        setTimeout(() => {
+          history.push('/service-tickets');
+        }, 1000);
+      } else {
+        showError('Unexpected response format from server');
+      }
     } catch (error: any) {
-      showError(error.response?.data?.message || 'Failed to create ticket');
+      console.error('[ERROR] Ticket creation error:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create ticket';
+      const errorDetails = error.response?.data?.error || '';
+      
+      showError(errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage);
     } finally {
       setLoading(false);
     }

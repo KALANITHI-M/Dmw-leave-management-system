@@ -128,8 +128,13 @@ export const createServiceTicket = async (req, res) => {
       }
     }
 
+    // Generate unique ticket number
+    const ticketCount = await ServiceTicket.countDocuments();
+    const ticketNumber = `ST-${String(ticketCount + 1).padStart(5, '0')}`;
+
     // Create ticket
     const ticket = new ServiceTicket({
+      ticketNumber, // Add ticket number
       title: title.trim(),
       description: description.trim(),
       priority,

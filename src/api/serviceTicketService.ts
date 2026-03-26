@@ -5,12 +5,19 @@ const SERVICE_TICKETS_API = '/service-tickets';
 export const serviceTicketService = {
   // Create a new service ticket
   createTicket: async (ticketData: FormData) => {
-    const response = await axiosInstance.post(`${SERVICE_TICKETS_API}`, ticketData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    try {
+      console.log('[DEBUG] Creating service ticket...');
+      const response = await axiosInstance.post(`${SERVICE_TICKETS_API}`, ticketData);
+      console.log('[DEBUG] Service ticket created successfully:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[ERROR] Service ticket creation failed:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
   },
 
   // Get all service tickets with filtering
@@ -64,16 +71,22 @@ export const serviceTicketService = {
 
   // Upload proof of work
   uploadProofOfWork: async (ticketId: string, formData: FormData) => {
-    const response = await axiosInstance.post(
-      `${SERVICE_TICKETS_API}/${ticketId}/upload-proof`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    return response.data;
+    try {
+      console.log('[DEBUG] Uploading proof of work for ticket:', ticketId);
+      const response = await axiosInstance.post(
+        `${SERVICE_TICKETS_API}/${ticketId}/upload-proof`,
+        formData
+      );
+      console.log('[DEBUG] Proof uploaded successfully:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[ERROR] Proof upload failed:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
   },
 
   // Add comment to ticket
