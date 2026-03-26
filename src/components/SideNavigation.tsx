@@ -280,6 +280,95 @@ const SideNavigation: React.FC<SideNavigationProps> = ({ contentId, activeSectio
                   <IonLabel>My Assigned Tickets</IonLabel>
                 </IonItem>
               </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Leave Management</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'apply-leave' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('apply-leave')}
+                >
+                  <IonIcon icon={addCircleOutline} slot="start" />
+                  <IonLabel>Apply For Leave</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'applied-leaves' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('applied-leaves')}
+                >
+                  <IonIcon icon={listOutline} slot="start" />
+                  <IonLabel>Applied Leaves</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Attendance</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance')}
+                >
+                  <IonIcon icon={timeOutline} slot="start" />
+                  <IonLabel>Check In / Check Out</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance-report' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance-report')}
+                >
+                  <IonIcon icon={barChartOutline} slot="start" />
+                  <IonLabel>Attendance Report</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'my-shift' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('my-shift')}
+                >
+                  <IonIcon icon={calendarOutline} slot="start" />
+                  <IonLabel>My Shift</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'attendance-regularization' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('attendance-regularization')}
+                >
+                  <IonIcon icon={alertCircleOutline} slot="start" />
+                  <IonLabel>Request Regularization</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonItem className="nav-section-header">
+                <IonLabel>Tasks</IonLabel>
+              </IonItem>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  className={activeSection === 'my-tasks' ? 'nav-item active sub-item' : 'nav-item sub-item'}
+                  onClick={() => handleMenuItemClick('my-tasks')}
+                >
+                  <IonIcon icon={clipboardOutline} slot="start" />
+                  <IonLabel>My Tasks</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
             </>
           )}
 

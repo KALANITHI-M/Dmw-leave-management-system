@@ -19,8 +19,16 @@ import {
   IonBadge,
 } from '@ionic/react';
 import { serviceTicketService } from '../api/serviceTicketService';
+import { leaveService, Leave, LeaveBalance } from '../api/leaveService';
 import SideNavigation from '../components/SideNavigation';
 import ProfileSection from '../components/ProfileSection';
+import LeaveApplicationForm from '../components/LeaveApplicationForm';
+import AppliedLeaves from '../components/AppliedLeaves';
+import AttendanceCheckIn from '../components/AttendanceCheckIn';
+import AttendanceReport from '../components/AttendanceReport';
+import MyShift from '../components/MyShift';
+import AttendanceRegularization from '../components/AttendanceRegularization';
+import MyTasks from '../components/MyTasks';
 import ServiceTicketManagement from './ServiceTicketManagement';
 import './EmployeeDashboard.css';
 
@@ -34,7 +42,7 @@ interface Statistics {
 }
 
 const ServiceEngineerDashboard: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'profile' | 'dashboard' | 'service-tickets'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'profile' | 'dashboard' | 'apply-leave' | 'applied-leaves' | 'attendance' | 'attendance-report' | 'my-shift' | 'attendance-regularization' | 'my-tasks' | 'service-tickets'>('dashboard');
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -49,18 +57,44 @@ const ServiceEngineerDashboard: React.FC = () => {
     closed: 0,
   });
 
+  const [myLeaves, setMyLeaves] = useState<Leave[]>([]);
+  const [leaveStats, setLeaveStats] = useState({
+    totalLeaves: 0,
+    pendingLeaves: 0,
+    approvedLeaves: 0,
+    rejectedLeaves: 0,
+  });
+  const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
+
   useEffect(() => {
     loadStatistics();
+    loadLeaves();
   }, []);
 
   const loadStatistics = async () => {
-    setLoading(true);
     try {
       const response = await serviceTicketService.getStatistics();
       setStats(response.statistics);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showMessage(error.response?.data?.message || 'Failed to load statistics', 'danger');
+    }
+  };
+
+  const loadLeaves = async () => {
+    setLoading(true);
+    try {
+      const [leavesData, statsData, balanceData] = await Promise.all([
+        leaveService.getMyLeaves(),
+        leaveService.getLeaveStats(),
+        leaveService.getMyBalance(),
+      ]);
+      setMyLeaves(leavesData);
+      setLeaveStats(statsData);
+      setLeaveBalance(balanceData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      showMessage(error.response?.data?.message || 'Failed to load leaves', 'danger');
     } finally {
       setLoading(false);
     }
@@ -70,6 +104,25 @@ const ServiceEngineerDashboard: React.FC = () => {
     setToastMessage(message);
     setToastColor(color);
     setShowToast(true);
+  };
+
+  const handleDeleteLeave = async (leaveId: string) => {
+    setLoading(true);
+    try {
+      await leaveService.deleteLeave(leaveId);
+      showMessage('Leave application deleted successfully', 'success');
+      loadLeaves();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      showMessage(error.response?.data?.message || 'Failed to delete leave', 'danger');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLeaveSubmitSuccess = () => {
+    loadLeaves();
+    setActiveSection('applied-leaves');
   };
 
   const renderContent = () => {
@@ -84,7 +137,7 @@ const ServiceEngineerDashboard: React.FC = () => {
               {/* Ticket Statistics */}
               <IonRow>
                 <IonCol size="12">
-                  <h2 style={{ marginBottom: '1rem' }}>Your Assigned Tickets Overview</h2>
+                  <h2 style={{ marginBottom: '1rem' }}>Your Work Overview</h2>
                 </IonCol>
               </IonRow>
 
@@ -123,70 +176,115 @@ const ServiceEngineerDashboard: React.FC = () => {
                 </IonCol>
               </IonRow>
 
-              {/* Quick Stats Summary */}
+              {/* Leave Statistics */}
               <IonRow>
                 <IonCol size="12">
-                  <IonCard>
+                  <h3 style={{ marginTop: '2rem' }}>Leave Summary</h3>
+                </IonCol>
+              </IonRow>
+
+              <IonRow>
+                <IonCol size="12" sizeMd="6" sizeLg="3">
+                  <IonCard className="stat-card total-card">
                     <IonCardContent>
-                      <h3 style={{ marginTop: 0 }}>Quick Summary</h3>
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                        gap: '1rem',
-                        marginTop: '1rem'
-                      }}>
-                        <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
-                          <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Active Assignments</p>
-                          <h3 style={{ margin: '0.5rem 0 0 0', color: '#1976d2' }}>
-                            {stats.assigned + stats.inProgress}
-                          </h3>
-                        </div>
-                        <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
-                          <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Completion Rate</p>
-                          <h3 style={{ margin: '0.5rem 0 0 0', color: '#4caf50' }}>
-                            {stats.assigned + stats.inProgress + stats.resolved > 0
-                              ? Math.round((stats.resolved / (stats.assigned + stats.inProgress + stats.resolved)) * 100)
-                              : 0}%
-                          </h3>
-                        </div>
-                        <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
-                          <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Awaiting Action</p>
-                          <h3 style={{ margin: '0.5rem 0 0 0', color: '#ff9800' }}>
-                            {stats.assigned}
-                          </h3>
-                        </div>
-                      </div>
+                      <h2>{leaveStats.totalLeaves}</h2>
+                      <p>Total Leaves</p>
+                    </IonCardContent>
+                  </IonCard>
+                </IonCol>
+                <IonCol size="12" sizeMd="6" sizeLg="3">
+                  <IonCard className="stat-card pending-card">
+                    <IonCardContent>
+                      <h2>{leaveStats.pendingLeaves}</h2>
+                      <p>Pending</p>
+                    </IonCardContent>
+                  </IonCard>
+                </IonCol>
+                <IonCol size="12" sizeMd="6" sizeLg="3">
+                  <IonCard className="stat-card approved-card">
+                    <IonCardContent>
+                      <h2>{leaveStats.approvedLeaves}</h2>
+                      <p>Approved</p>
+                    </IonCardContent>
+                  </IonCard>
+                </IonCol>
+                <IonCol size="12" sizeMd="6" sizeLg="3">
+                  <IonCard className="stat-card rejected-card">
+                    <IonCardContent>
+                      <h2>{leaveStats.rejectedLeaves}</h2>
+                      <p>Rejected</p>
                     </IonCardContent>
                   </IonCard>
                 </IonCol>
               </IonRow>
 
-              {/* Information Card */}
-              <IonRow>
-                <IonCol size="12">
-                  <IonCard>
-                    <IonCardContent>
-                      <h3 style={{ marginTop: 0 }}>Your Role</h3>
-                      <IonText>
-                        <p>
-                          As a Service Engineer, you are responsible for handling and resolving assigned service tickets.
-                          Your responsibilities include:
-                        </p>
-                        <ul style={{ paddingLeft: '1.5rem' }}>
-                          <li>View your assigned tickets in the "My Tickets" section</li>
-                          <li>Update ticket status as you progress</li>
-                          <li>Upload proof of work and completion details</li>
-                          <li>Add work notes and comments to tickets</li>
-                          <li>Communicate with employees through ticket comments</li>
-                        </ul>
-                      </IonText>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-              </IonRow>
+              {/* Leave balance summary */}
+              {leaveBalance && (
+                <IonRow>
+                  <IonCol size="12">
+                    <IonCard className="balance-summary-card">
+                      <IonCardContent>
+                        <h3 className="balance-summary-title">
+                          Leave Balance — {leaveBalance.year}
+                        </h3>
+                        <div className="balance-table-wrapper">
+                          <table className="balance-table">
+                            <thead>
+                              <tr>
+                                <th>Leave Type</th>
+                                <th>Allocated</th>
+                                <th>Used</th>
+                                <th>Pending</th>
+                                <th>Remaining</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {leaveBalance.balances.map((b) => {
+                                const remaining = Math.round((b.allocated - b.used - b.pending) * 2) / 2;
+                                return (
+                                  <tr key={b.leaveType}>
+                                    <td>{b.leaveType}</td>
+                                    <td>{b.allocated}</td>
+                                    <td>{b.used}</td>
+                                    <td>{b.pending}</td>
+                                    <td className={remaining <= 0 ? 'balance-none' : remaining <= b.allocated * 0.3 ? 'balance-low' : 'balance-ok'}>
+                                      {remaining}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </IonCardContent>
+                    </IonCard>
+                  </IonCol>
+                </IonRow>
+              )}
             </IonGrid>
           </div>
         );
+
+      case 'apply-leave':
+        return <LeaveApplicationForm onSuccess={handleLeaveSubmitSuccess} />;
+
+      case 'applied-leaves':
+        return <AppliedLeaves leaves={myLeaves} onDelete={handleDeleteLeave} />;
+
+      case 'attendance':
+        return <AttendanceCheckIn />;
+
+      case 'attendance-report':
+        return <AttendanceReport />;
+
+      case 'my-shift':
+        return <MyShift />;
+
+      case 'attendance-regularization':
+        return <AttendanceRegularization />;
+
+      case 'my-tasks':
+        return <MyTasks embedded />;
 
       case 'service-tickets':
         return <ServiceTicketManagement />;
