@@ -39,9 +39,25 @@ export const uploadProofMiddleware = multer({
 // Upload file to Cloudinary
 const uploadToCloudinary = (buffer, mimetype, filename, fileExt) =>
   new Promise((resolve, reject) => {
-    // Determine resource type based on file extension
+    // Determine resource type based on mimetype (most reliable method)
     let resourceType = 'auto';
-    if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(fileExt?.toLowerCase())) {
+    
+    // List of mimetypes that should be stored as raw files
+    const rawMimetypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain',
+      'text/csv',
+    ];
+
+    if (rawMimetypes.includes(mimetype)) {
+      resourceType = 'raw';
+    } else if (fileExt && ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'].includes(fileExt.toLowerCase())) {
       resourceType = 'raw';
     }
 
